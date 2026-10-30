@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.next/
+.expo/
+*.env
+*.env.local
+*.env.*.local
+.turbo/
+coverage/
+.nyc_output/
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*

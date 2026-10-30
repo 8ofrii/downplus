@@ -1,0 +1,287 @@
+openapi: 3.1.0
+info:
+  title: Down Plus — Digital Health Engine API
+  version: 1.0.0
+  description: |
+    Production-ready API specification for the Down Plus Digital Health Engine.
+    Handles child profiles, de-identified clinical records, OCR extraction pipeline,
+    RAG-powered clinical assistant, doctor matching matrix, and Paymob subscription gates.
+servers:
+  - url: https://api.downplus.health/api/v1
+    description: Production Server (AWS me-south-1)
+  - url: http://localhost:3000/api/v1
+    description: Local Development Server
+
+paths:
+  /auth/register:
+    post:
+      summary: Register parent or healthcare provider
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, phoneNumber, password]
+              properties:
+                email: { type: string, format: email, example: "parent@example.com" }
+                phoneNumber: { type: string, example: "+201012345678" }
+                password: { type: string, minLength: 8, example: "Secret123!" }
+                role: { type: string, enum: [parent, doctor, clinic_admin, super_admin], default: parent }
+      responses:
+        "201":
+          description: User registered successfully, returns JWT access and refresh tokens.
+
+  /auth/login:
+    post:
+      summary: Login with email and password
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        "200":
+          description: Authenticated, returns JWT token pair.
+
+  /children:
+    post:
+      summary: Register child profile with initial clinical parameters
+      tags: [Children]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [first_name, last_name, date_of_birth]
+              properties:
+                first_name: { type: string, example: "عمر" }
+                last_name: { type: string, example: "أحمد" }
+                date_of_birth: { type: string, format: date, example: "2024-03-15" }
+                gender: { type: string, enum: [male, female], example: "male" }
+                blood_type: { type: string, example: "A+" }
+                karyotype_type: { type: string, example: "Trisomy 21" }
+                comorbidities:
+                  type: array
+                  items: { type: string }
+                  example: ["Congenital Heart Defect", "Hypothyroidism"]
+      responses:
+        "201":
+          description: Child profile created
+          content:
+            application/json:
+              example:
+                child_id: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+                message: "Child profile created successfully. Ready for initial documentation."
+
+    get:
+      summary: List children belonging to authenticated parent
+      tags: [Children]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Array of children profiles
+
+  /children/{child_id}/documents/presigned-url:
+    post:
+      summary: Request presigned S3 upload URL for medical records (15-min expiry)
+      tags: [Medical Documents]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: child_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [file_name, file_type, document_category]
+              properties:
+                file_name: { type: string, example: "thyroid_echo_report.pdf" }
+                file_type: { type: string, example: "application/pdf" }
+                document_category: { type: string, enum: [Lab, Echo, Genetics, Therapy_Report, Prescription] }
+      responses:
+        "200":
+          description: Presigned upload URL generated
+          content:
+            application/json:
+              example:
+                document_id: "c8d4e6f2-1a2b-4c3d-8e5f-6a7b8c9d0e1f"
+                upload_url: "https://s3.region.amazonaws.com/health-docs/c8d4e6f2...?AWSAccessKeyId=..."
+                instructions: "Upload file directly via PUT request within 15 minutes."
+
+  /children/{child_id}/case-baseline:
+    get:
+      summary: Retrieve AI-generated or doctor-verified case baseline
+      tags: [Clinical Case Baseline]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: child_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Clinical case baseline summary
+          content:
+            application/json:
+              example:
+                id: "e4f5a6b7-c8d9-4e0f-1a2b-3c4d5e6f7a8b"
+                child_id: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+                status: "draft_pending_doctor"
+                ai_generated_summary:
+                  extracted_conditions: ["Trisomy 21", "Hypothyroidism"]
+                  current_medications:
+                    - drug: "Eltroxin"
+                      dosage: "25 mcg"
+                      frequency: "Once daily before feeding"
+                  identified_strengths: ["High social response", "Visual tracking established"]
+                  priority_clinical_needs: ["Thyroid profile re-evaluation due in 3 weeks", "Physical therapy for low tone"]
+
+  /clinical/baseline/{baseline_id}/confirm:
+    post:
+      summary: Doctor confirms or adjusts the AI case baseline
+      tags: [Clinical Case Baseline]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: baseline_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [confirmed_by_doctor, manually_overridden] }
+                doctor_notes: { type: string }
+                adjustments:
+                  type: object
+                  properties:
+                    add_conditions: { type: array, items: { type: string } }
+                    remove_conditions: { type: array, items: { type: string } }
+      responses:
+        "200":
+          description: Baseline confirmed
+
+  /ai/chat:
+    post:
+      summary: De-identified clinical copilot conversation with doctor recommendation
+      tags: [AI Clinical Copilot]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [child_id, message]
+              properties:
+                session_id: { type: string, format: uuid }
+                child_id: { type: string, format: uuid }
+                message: { type: string, example: "عمر عنده الآن سنتين ونصف ولسه مش بيمشي لوحده، إيه الخطوة ومين دكتور في الجيزة؟" }
+      responses:
+        "200":
+          description: Safe clinical response with optional matched specialist cards
+          content:
+            application/json:
+              example:
+                response_text: "في متلازمة داون، يبلغ متوسط المشي المستقل عادة بين سنتين إلى 3 سنوات..."
+                recommended_doctors:
+                  - doctor_id: "1111-2222-3333-4444"
+                    name: "د. هاني مصطفى"
+                    specialty: "استشاري تأهيل وعلاج طبيعي للأطفال"
+                    city: "الجيزة"
+                    match_score: 0.94
+
+  /children/{child_id}/milestones/{milestone_id}:
+    patch:
+      summary: Update developmental milestone on the Independence Ladder
+      tags: [Milestones & Skills]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: child_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: milestone_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [not_started, with_assistance, independent, mastered_outside] }
+                notes: { type: string, example: "يقف بمفرده ممسكاً بالطاولة لمدة 20 ثانية" }
+      responses:
+        "200":
+          description: Milestone updated
+
+  /sharing/generate-token:
+    post:
+      summary: Generate time-limited encrypted token and QR code for external doctor
+      tags: [Sharing & Guest Portal]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [child_id]
+              properties:
+                child_id: { type: string, format: uuid }
+                validity_hours: { type: integer, default: 48, maximum: 168 }
+                can_view_full_history: { type: boolean, default: true }
+                can_add_clinical_notes: { type: boolean, default: false }
+      responses:
+        "200":
+          description: Share link and SVG QR code generated
+
+  /guest/view:
+    get:
+      summary: Access read-only clinical passport using guest token (no login required)
+      tags: [Sharing & Guest Portal]
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Patient de-identified clinical summary
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

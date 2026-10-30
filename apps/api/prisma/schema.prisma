@@ -1,0 +1,293 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [uuid_ossp(map: "uuid-ossp"), pgcrypto, vector]
+}
+
+enum UserRole {
+  parent
+  doctor
+  clinic_admin
+  super_admin
+
+  @@map("user_role")
+}
+
+enum DocumentStatus {
+  uploaded
+  processing_ocr
+  ocr_completed
+  failed
+
+  @@map("document_status")
+}
+
+enum BaselineStatus {
+  draft_pending_doctor
+  confirmed_by_doctor
+  manually_overridden
+
+  @@map("baseline_status")
+}
+
+enum SkillStatus {
+  not_started
+  with_assistance
+  independent
+  mastered_outside
+
+  @@map("skill_status")
+}
+
+enum SubscriptionTier {
+  free
+  premium_monthly
+  premium_annual
+
+  @@map("subscription_tier")
+}
+
+enum SubscriptionStatusEnum {
+  active
+  canceled
+  past_due
+  expired
+
+  @@map("subscription_status")
+}
+
+model User {
+  id           String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email        String    @unique @db.VarChar(255)
+  phoneNumber  String    @unique @map("phone_number") @db.VarChar(30)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  role         UserRole  @default(parent)
+  isVerified   Boolean   @default(false) @map("is_verified")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  children             Child[]
+  doctorProfile        DoctorProfile?
+  milestoneUpdates     ChildMilestoneProgress[]
+  caseUpdateLogs       CaseUpdateLog[]
+  grantedAccessTokens  DoctorAccessToken[]      @relation("GrantedBy")
+  receivedAccessTokens DoctorAccessToken[]      @relation("TargetDoctor")
+  verifiedBaselines    CaseBaseline[]           @relation("VerifiedBy")
+  subscription         Subscription?
+
+  @@map("users")
+}
+
+model Child {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  parentId    String   @map("parent_id") @db.Uuid
+  firstName   String   @map("first_name") @db.VarChar(100)
+  lastName    String   @map("last_name") @db.VarChar(100)
+  dateOfBirth DateTime @map("date_of_birth") @db.Date
+  gender      String?  @db.VarChar(10)
+  bloodType   String?  @map("blood_type") @db.VarChar(5)
+  avatarUrl   String?  @map("avatar_url")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  parent            User                    @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  clinicalProfile   ChildClinicalProfile?
+  documents         MedicalDocument[]
+  caseBaseline      CaseBaseline?
+  milestoneProgress ChildMilestoneProgress[]
+  caseUpdateLogs    CaseUpdateLog[]
+  accessTokens      DoctorAccessToken[]
+  chatSessions      AiChatSession[]
+
+  @@map("children")
+}
+
+model ChildClinicalProfile {
+  id                  String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  childId             String   @unique @map("child_id") @db.Uuid
+  primaryDiagnosis    String   @default("Down Syndrome") @map("primary_diagnosis") @db.VarChar(100)
+  karyotypeType       String?  @map("karyotype_type") @db.VarChar(100)
+  gestationalAgeWeeks Int?     @map("gestational_age_weeks")
+  birthWeightKg       Decimal? @map("birth_weight_kg") @db.Decimal(4, 2)
+  comorbidities       Json     @default("[]")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@map("child_clinical_profiles")
+}
+
+model MedicalDocument {
+  id               String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  childId          String         @map("child_id") @db.Uuid
+  fileName         String         @map("file_name") @db.VarChar(255)
+  s3Key            String         @map("s3_key")
+  fileType         String         @map("file_type") @db.VarChar(50)
+  documentCategory String         @map("document_category") @db.VarChar(50)
+  ocrRawText       String?        @map("ocr_raw_text")
+  processingStatus DocumentStatus @default(uploaded) @map("processing_status")
+  uploadedAt       DateTime       @default(now()) @map("uploaded_at") @db.Timestamptz
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@map("medical_documents")
+}
+
+model CaseBaseline {
+  id                 String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  childId            String         @unique @map("child_id") @db.Uuid
+  aiGeneratedSummary Json           @map("ai_generated_summary")
+  doctorNotes        String?        @map("doctor_notes")
+  status             BaselineStatus @default(draft_pending_doctor)
+  verifiedByDoctorId String?        @map("verified_by_doctor_id") @db.Uuid
+  verifiedAt         DateTime?      @map("verified_at") @db.Timestamptz
+  createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  child            Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+  verifiedByDoctor User? @relation("VerifiedBy", fields: [verifiedByDoctorId], references: [id])
+
+  @@map("case_baselines")
+}
+
+model MilestoneCatalog {
+  id                       String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  moduleDisease            String  @default("Down Syndrome") @map("module_disease") @db.VarChar(50)
+  domain                   String  @db.VarChar(50)
+  ageBracketMinMonths      Int     @map("age_bracket_min_months")
+  ageBracketMaxMonths      Int     @map("age_bracket_max_months")
+  titleAr                  String  @map("title_ar") @db.VarChar(255)
+  titleEn                  String  @map("title_en") @db.VarChar(255)
+  descriptionAr            String? @map("description_ar")
+  descriptionEn            String? @map("description_en")
+  isMandatoryClinicalCheck Boolean @default(false) @map("is_mandatory_clinical_check")
+
+  progress ChildMilestoneProgress[]
+
+  @@map("milestone_catalog")
+}
+
+model ChildMilestoneProgress {
+  id                  String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  childId             String      @map("child_id") @db.Uuid
+  milestoneId         String      @map("milestone_id") @db.Uuid
+  status              SkillStatus @default(not_started)
+  lastUpdatedByUserId String      @map("last_updated_by_user_id") @db.Uuid
+  notes               String?
+  updatedAt           DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  child     Child            @relation(fields: [childId], references: [id], onDelete: Cascade)
+  milestone MilestoneCatalog @relation(fields: [milestoneId], references: [id], onDelete: Restrict)
+  updatedBy User             @relation(fields: [lastUpdatedByUserId], references: [id])
+
+  @@unique([childId, milestoneId], name: "unique_child_milestone")
+  @@map("child_milestone_progress")
+}
+
+model CaseUpdateLog {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  childId    String   @map("child_id") @db.Uuid
+  authorId   String   @map("author_id") @db.Uuid
+  updateType String   @map("update_type") @db.VarChar(50)
+  content    String
+  metadata   Json     @default("{}")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  child  Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+  author User  @relation(fields: [authorId], references: [id])
+
+  @@map("case_update_logs")
+}
+
+model DoctorProfile {
+  id                          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId                      String   @unique @map("user_id") @db.Uuid
+  fullName                    String   @map("full_name") @db.VarChar(255)
+  medicalLicenseNumber        String   @map("medical_license_number") @db.VarChar(100)
+  specialty                   String   @db.VarChar(100)
+  city                        String   @db.VarChar(100)
+  governorateOrState          String   @map("governorate_or_state") @db.VarChar(100)
+  country                     String   @default("EG") @db.VarChar(10)
+  consultationFee             Decimal  @map("consultation_fee") @db.Decimal(10, 2)
+  experienceYearsPediatric    Int      @map("experience_years_pediatric")
+  downSyndromeExperienceScore Decimal  @default(5.00) @map("down_syndrome_experience_score") @db.Decimal(3, 2)
+  tags                        String[]
+  isActive                    Boolean  @default(true) @map("is_active")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("doctor_profiles")
+}
+
+model DoctorAccessToken {
+  id                  String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  childId             String    @map("child_id") @db.Uuid
+  grantedByUserId     String    @map("granted_by_user_id") @db.Uuid
+  targetDoctorId      String?   @map("target_doctor_id") @db.Uuid
+  token               String    @unique @db.VarChar(128)
+  canViewFullHistory  Boolean   @default(true) @map("can_view_full_history")
+  canAddClinicalNotes Boolean   @default(false) @map("can_add_clinical_notes")
+  expiresAt           DateTime  @map("expires_at") @db.Timestamptz
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  child        Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+  grantedBy    User  @relation("GrantedBy", fields: [grantedByUserId], references: [id])
+  targetDoctor User? @relation("TargetDoctor", fields: [targetDoctorId], references: [id])
+
+  @@map("doctor_access_tokens")
+}
+
+model AiChatSession {
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  childId      String   @map("child_id") @db.Uuid
+  sessionTitle String   @default("Medical Session") @map("session_title") @db.VarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  child    Child           @relation(fields: [childId], references: [id], onDelete: Cascade)
+  messages AiChatMessage[]
+
+  @@map("ai_chat_sessions")
+}
+
+model AiChatMessage {
+  id                   String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  sessionId            String   @map("session_id") @db.Uuid
+  senderType           String   @map("sender_type") @db.VarChar(10)
+  messageText          String   @map("message_text")
+  recommendedDoctorIds String[] @default([]) @map("recommended_doctor_ids") @db.Uuid
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  session AiChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("ai_chat_messages")
+}
+
+model ClinicalKnowledgeVector {
+  id              String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  diseaseCategory String                 @default("Down Syndrome") @map("disease_category") @db.VarChar(50)
+  sourceTitle     String                 @map("source_title") @db.VarChar(255)
+  contentChunk    String                 @map("content_chunk")
+  embedding       Unsupported("vector")?
+
+  @@map("clinical_knowledge_vectors")
+}
+
+model Subscription {
+  id                  String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId              String                 @unique @map("user_id") @db.Uuid
+  tier                SubscriptionTier       @default(free)
+  status              SubscriptionStatusEnum @default(active)
+  currentPeriodStart  DateTime?              @map("current_period_start") @db.Timestamptz
+  currentPeriodEnd    DateTime?              @map("current_period_end") @db.Timestamptz
+  paymobOrderId       String?                @map("paymob_order_id") @db.VarChar(100)
+  paymobTransactionId String?                @map("paymob_transaction_id") @db.VarChar(100)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
