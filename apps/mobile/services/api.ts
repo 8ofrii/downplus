@@ -173,6 +173,11 @@ class ApiService {
   async getTimeline(childId: string) {
     return this.request<any[]>(`/case-updates/timeline/${childId}`);
   }
+
+  // ── Growth Engine ──
+  async getChildGrowth(childId: string) {
+    return this.request<any>(`/children/${childId}/growth`);
+  }
 }
 
 export const api = new ApiService();

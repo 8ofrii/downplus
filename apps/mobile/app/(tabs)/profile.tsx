@@ -122,7 +122,50 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* ── 3. Temporary Secure Doctor Sharing (48h Token) ── */}
+        {/* ── 3. Down Syndrome Specific Growth Curves (CDC/AAP) ── */}
+        <View style={styles.glassCard}>
+          <View style={styles.cardHeader}>
+            <View style={[styles.cardHeaderIcon, { backgroundColor: '#EFF6FF' }]}>
+              <Text style={{ fontSize: 22 }}>📈</Text>
+            </View>
+            <View>
+              <Text style={styles.cardTitle}>منحنيات نمو متلازمة داون (CDC/AAP)</Text>
+              <Text style={styles.cardSubTitle}>Trisomy 21 Specialized Percentile Tracker</Text>
+            </View>
+          </View>
+
+          <View style={styles.growthBadge}>
+            <Text style={styles.growthBadgeText}>
+              🧬 يُقاس نمو عمر وفق معايير الأكاديمية الأمريكية الخاصة بمتلازمة داون
+            </Text>
+          </View>
+
+          <View style={styles.growthGrid}>
+            <View style={styles.growthBox}>
+              <Text style={styles.growthLabel}>الوزن الحالي</Text>
+              <Text style={styles.growthValue}>12.4 كجم</Text>
+              <View style={styles.percentilePill}>
+                <Text style={styles.percentileText}>المئين 50% • مثالي ✅</Text>
+              </View>
+            </View>
+
+            <View style={styles.growthBox}>
+              <Text style={styles.growthLabel}>الطول الحالي</Text>
+              <Text style={styles.growthValue}>88 سم</Text>
+              <View style={styles.percentilePill}>
+                <Text style={styles.percentileText}>المئين 48% • متناسق ✅</Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.growthTip}>
+            <Text style={styles.growthTipText}>
+              💡 المنحنيات العامة (WHO) قد تُظهر وزنه منخفضاً بشكل خاطئ، بينما قياسات عمر على منحنيات داون المتخصصة تقع تماماً في النطاق السليم لنمو العظام والعضلات.
+            </Text>
+          </View>
+        </View>
+
+        {/* ── 4. Temporary Secure Doctor Sharing (48h Token) ── */}
         <View style={styles.glassCard}>
           <View style={styles.cardHeader}>
             <View style={[styles.cardHeaderIcon, { backgroundColor: Colors.secondaryLight }]}>
@@ -344,6 +387,68 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '800',
     fontSize: 13,
+  },
+
+  // Growth Curves Card Styles
+  growthBadge: {
+    backgroundColor: '#EFF6FF',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+  },
+  growthBadgeText: {
+    fontSize: 11,
+    color: '#1E40AF',
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  growthGrid: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  growthBox: {
+    flex: 1,
+    backgroundColor: Colors.glassSurfaceSubtle,
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: Colors.glassBorderSubtle,
+    alignItems: 'center',
+    gap: 4,
+  },
+  growthLabel: {
+    fontSize: 11,
+    color: Colors.textTertiary,
+    fontWeight: '600',
+  },
+  growthValue: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: Colors.textPrimary,
+  },
+  percentilePill: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  percentileText: {
+    fontSize: 10,
+    color: '#15803D',
+    fontWeight: '800',
+  },
+  growthTip: {
+    backgroundColor: Colors.glassSurfaceSubtle,
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.glassBorderSubtle,
+  },
+  growthTipText: {
+    fontSize: 11,
+    color: Colors.textSecondary,
+    lineHeight: 16,
   },
 
   // Settings Card
