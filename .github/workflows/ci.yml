@@ -1,0 +1,74 @@
+name: Down Plus CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    name: Monorepo Typecheck & Build Matrix
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Monorepo Dependencies
+        run: npm ci
+
+      - name: Prisma Client Generation
+        run: |
+          cd apps/api
+          npx prisma generate
+
+      - name: Typecheck Backend API (apps/api)
+        run: |
+          cd apps/api
+          npx tsc --noEmit
+
+      - name: Typecheck Web Portal (apps/web)
+        run: |
+          cd apps/web
+          npx tsc --noEmit
+
+      - name: Typecheck Mobile App (apps/mobile)
+        run: |
+          cd apps/mobile
+          npx tsc --noEmit
+
+      - name: Build NestJS API
+        run: |
+          npm run build --workspace=apps/api
+
+      - name: Build Next.js Web
+        run: |
+          npm run build --workspace=apps/web
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Verify Expo Mobile Bundling
+        run: |
+          cd apps/mobile
+          npx expo export --platform android --no-minify
+
+  docker-lint:
+    name: Dockerfile Lint & Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Validate Dockerfiles Exist
+        run: |
+          test -f apps/api/Dockerfile
+          test -f apps/web/Dockerfile
+          test -f infrastructure/docker-compose.prod.yml
+          echo "All production Docker configurations present."

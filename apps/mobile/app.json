@@ -5,7 +5,9 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
     "splash": {
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#F1FCF5"
     },
@@ -14,7 +16,11 @@
       "bundleIdentifier": "health.downplus.app"
     },
     "android": {
-      "package": "health.downplus.app"
+      "package": "health.downplus.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F1FCF5"
+      }
     },
     "plugins": [
       "expo-router",

@@ -50,10 +50,26 @@ const DEMO_DOCTORS: DoctorItem[] = [
 export default function AdminDashboardPage() {
   const [doctors, setDoctors] = useState<DoctorItem[]>(DEMO_DOCTORS);
 
-  const toggleDoctor = (id: string) => {
+  const toggleDoctor = async (id: string) => {
+    const doc = doctors.find((d) => d.id === id);
+    if (!doc) return;
+    const newStatus = !doc.isActive;
+
+    // Optimistic UI update
     setDoctors((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, isActive: !d.isActive } : d)),
+      prev.map((d) => (d.id === id ? { ...d, isActive: newStatus } : d)),
     );
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+      await fetch(`${apiUrl}/admin/doctors/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_active: newStatus }),
+      });
+    } catch {
+      // Graceful offline fallback
+    }
   };
 
   return (

@@ -35,14 +35,14 @@ export class AnonymizerService {
       sanitized = sanitized.replace(new RegExp(escapedLast, 'gi'), '');
     }
 
-    // 2. Strip Phone Numbers (International & Local MENA formats)
-    sanitized = sanitized.replace(/(\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9})/g, '[PHONE REDACTED]');
+    // 2. Strip National IDs (e.g. Egyptian 14-digit National ID) first before shorter phone patterns
+    sanitized = sanitized.replace(/\b\d{14}\b/g, '[NATIONAL_ID REDACTED]');
 
     // 3. Strip Email Addresses
     sanitized = sanitized.replace(/[\w.-]+@[\w.-]+\.\w+/g, '[EMAIL REDACTED]');
 
-    // 4. Strip National IDs (e.g. Egyptian 14-digit National ID)
-    sanitized = sanitized.replace(/\b\d{14}\b/g, '[NATIONAL_ID REDACTED]');
+    // 4. Strip Phone Numbers (International & Local MENA formats)
+    sanitized = sanitized.replace(/(\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9})/g, '[PHONE REDACTED]');
 
     return sanitized;
   }
