@@ -6,143 +6,238 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
+  Modal,
+  Platform,
 } from 'react-native';
+import { Colors, Shadows } from '../../constants/theme';
 
-const DEMO_DOCS = [
+interface DocItem {
+  id: string;
+  fileName: string;
+  category: string;
+  categoryLabel: string;
+  status: 'ocr_completed' | 'processing_ocr';
+  statusLabel: string;
+  date: string;
+  summary: string;
+  icon: string;
+}
+
+const DEMO_DOCS: DocItem[] = [
   {
     id: 'doc-1',
-    fileName: 'echocardiogram_neonatal_report.pdf',
+    fileName: 'echocardiogram_post_vsd_report.pdf',
     category: 'Echo',
-    categoryLabel: 'إيكو القلب',
+    categoryLabel: 'إيكو القلب وسونار الأوعية',
     status: 'ocr_completed',
-    statusLabel: 'مكتمل المعالجة بالذكاء الاصطناعي ✅',
+    statusLabel: 'تم التحليل والاستخراج بـ AI ✅',
     date: '2024-04-10',
-    summary: 'تم فحص ثقب القلب البطيني (VSD)، الحجم صغير مع إغلاق تلقائي جزئي بدون قصور حركي.',
+    summary: 'تم فحص جراحة VSD السابقة، كفاءة عضلة القلب طبيعية (EF 64%) ولا يوجد تسريب متبقٍ.',
+    icon: '🫀',
   },
   {
     id: 'doc-2',
-    fileName: 'thyroid_tsh_ft4_panel.pdf',
+    fileName: 'thyroid_tsh_ft4_panel_2024.pdf',
     category: 'Lab',
-    categoryLabel: 'تحاليل مخبرية',
+    categoryLabel: 'فحوصات الغدة الدرقية',
     status: 'ocr_completed',
-    statusLabel: 'مكتمل المعالجة بالذكاء الاصطناعي ✅',
+    statusLabel: 'تم التحليل والاستخراج بـ AI ✅',
     date: '2024-09-18',
-    summary: 'TSH: 4.8 mIU/L, FT4: 1.1 ng/dL. الجرعة الحالية (25 ميكروجرام) ملائمة مع الوزن الحالي.',
+    summary: 'TSH: 4.8 mIU/L, FT4: 1.1 ng/dL. الجرعة الحالية (25 ميكروجرام) متوافقة ومستقرة.',
+    icon: '🩸',
   },
   {
     id: 'doc-3',
-    fileName: 'speech_therapy_evaluation.pdf',
+    fileName: 'speech_therapy_early_intervention.pdf',
     category: 'Therapy_Report',
-    categoryLabel: 'تقرير تخاطب',
+    categoryLabel: 'تقرير جلسة التخاطب والتواصل',
     status: 'processing_ocr',
-    statusLabel: 'قيد الاستخراج والتحليل الذكي ⏳',
+    statusLabel: 'جاري استخراج الخطة بواسطة OCR ⏳',
     date: '2026-10-28',
-    summary: 'جاري استخراج المهارات الشفهية وخطة التدخل المبكر بواسطة نموذج الرؤية الطبية...',
+    summary: 'جاري استخراج المهارات الشفهية وخطة التدخل المبكر بواسطة نموذج الرؤية الطبية المعتمد...',
+    icon: '🗣️',
   },
 ];
 
 export default function DocumentsScreen() {
-  const [documents, setDocuments] = useState(DEMO_DOCS);
+  const [documents, setDocuments] = useState<DocItem[]>(DEMO_DOCS);
+  const [uploadModal, setUploadModal] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  const handleUploadNew = () => {
-    Alert.alert(
-      'رفع وثيقة أو تقرير طبي',
-      'اختر تصنيف الوثيقة لرفعها وتوليد رابط سحابي مشفر ذو تدمير ذاتي (15 دقيقة)',
-      [
-        {
-          text: 'إيكو أو سونار قلب 🫀',
-          onPress: () => simulateUpload('Echo', 'new_echo_scan.pdf'),
-        },
-        {
-          text: 'تحليل دم / غدة درقية 🩸',
-          onPress: () => simulateUpload('Lab', 'new_lab_results.pdf'),
-        },
-        {
-          text: 'تقرير تخاطب أو علاج طبيعي 📋',
-          onPress: () => simulateUpload('Therapy_Report', 'therapy_eval.pdf'),
-        },
-        { text: 'إلغاء', style: 'cancel' },
-      ],
-    );
-  };
-
-  const simulateUpload = (category: string, fileName: string) => {
+  const simulateUpload = (category: string, categoryLabel: string, icon: string, name: string) => {
+    setUploadModal(false);
     setUploading(true);
+
     setTimeout(() => {
-      const newDoc = {
+      const newDoc: DocItem = {
         id: `doc-${Date.now()}`,
-        fileName,
+        fileName: name,
         category,
-        categoryLabel: category === 'Echo' ? 'إيكو قلب' : 'تحاليل',
+        categoryLabel,
         status: 'ocr_completed',
-        statusLabel: 'مكتمل المعالجة بالذكاء الاصطناعي ✅',
-        date: new Date().toISOString().split('T')[0],
-        summary: 'تم استخراج البيانات وربطها بمسودة الحالة السريرية بنجاح.',
+        statusLabel: 'تم التحليل والاستخراج بـ AI ✅',
+        date: '2026-10-30',
+        summary: 'تم ربط المستند المشفر بنجاح بملف عمر السريري وتحديث خطة المتابعة تلقائياً.',
+        icon,
       };
-      setDocuments([newDoc, ...documents]);
+      setDocuments((prev) => [newDoc, ...prev]);
       setUploading(false);
-    }, 1500);
+    }, 1200);
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>المستندات والتقارير الطبية (OCR Pipeline) 📄</Text>
-        <Text style={styles.subtitle}>
-          يتم استخراج البيانات الطبية تلقائياً وتلخيصها لعرضها على الطبيب
-        </Text>
-
-        <TouchableOpacity
-          style={styles.uploadBtn}
-          onPress={handleUploadNew}
-          disabled={uploading}
-        >
-          {uploading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.uploadBtnText}>+ رفع تقرير أو تحليل جديد</Text>
-          )}
-        </TouchableOpacity>
+      {/* Ambient background glow */}
+      <View style={styles.ambientContainer} pointerEvents="none">
+        <View style={[styles.ambientOrb, styles.orbTop]} />
+        <View style={[styles.ambientOrb, styles.orbBottom]} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.listContent}>
-        {documents.map((doc) => (
-          <View key={doc.id} style={styles.docCard}>
-            <View style={styles.docTop}>
-              <View
-                style={[
-                  styles.statusBadge,
-                  doc.status === 'ocr_completed'
-                    ? styles.statusBadgeSuccess
-                    : styles.statusBadgePending,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.statusBadgeText,
-                    doc.status === 'ocr_completed'
-                      ? styles.statusSuccessText
-                      : styles.statusPendingText,
-                  ]}
-                >
-                  {doc.statusLabel}
-                </Text>
-              </View>
-              <Text style={styles.categoryTag}>{doc.categoryLabel}</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* ── 1. Top Vault Summary Card ── */}
+        <View style={styles.headerCard}>
+          <View style={styles.headerTop}>
+            <View>
+              <Text style={styles.headerSub}>سجل الفحوصات والتقارير الطبية المشفرة</Text>
+              <Text style={styles.headerTitle}>خزينة ملفات عمر الطبية 📂</Text>
             </View>
-
-            <Text style={styles.fileName}>{doc.fileName}</Text>
-            <Text style={styles.docDate}>تاريخ الإضافة: {doc.date}</Text>
-
-            <View style={styles.summaryBox}>
-              <Text style={styles.summaryTitle}>الملخص الطبي المستخرج:</Text>
-              <Text style={styles.summaryText}>{doc.summary}</Text>
+            <View style={styles.shieldBadge}>
+              <Text style={{ fontSize: 18 }}>🔒</Text>
             </View>
           </View>
-        ))}
+
+          <Text style={styles.headerDesc}>
+            يتم تشفير كافة التقارير بتقنية AES-256، ومعالجتها بنموذج OCR الطبي لاستخراج التشخيصات الحركية والقلبية والغدة تلقائياً.
+          </Text>
+
+          <TouchableOpacity
+            style={styles.uploadBtn}
+            onPress={() => setUploadModal(true)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.uploadBtnText}>+ إضافة تقرير أو فحص مخبري جديد</Text>
+          </TouchableOpacity>
+        </View>
+
+        {uploading && (
+          <View style={styles.uploadingNotice}>
+            <ActivityIndicator color={Colors.primary} size="small" />
+            <Text style={styles.uploadingNoticeText}>
+              جاري الرفع المشفر وتحليل المستند عبر الذكاء الاصطناعي...
+            </Text>
+          </View>
+        )}
+
+        {/* ── 2. Documents List ── */}
+        <View style={styles.docList}>
+          {documents.map((doc) => (
+            <View key={doc.id} style={styles.docCard}>
+              <View style={styles.docCardHeader}>
+                <View style={styles.docIconWrap}>
+                  <Text style={{ fontSize: 24 }}>{doc.icon}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.docCategory}>{doc.categoryLabel}</Text>
+                  <Text style={styles.docFileName} numberOfLines={1}>
+                    {doc.fileName}
+                  </Text>
+                </View>
+                <View
+                  style={[
+                    styles.statusBadge,
+                    doc.status === 'ocr_completed'
+                      ? styles.statusCompleted
+                      : styles.statusProcessing,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.statusBadgeText,
+                      doc.status === 'ocr_completed'
+                        ? styles.statusTextCompleted
+                        : styles.statusTextProcessing,
+                    ]}
+                  >
+                    {doc.statusLabel}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.summaryBox}>
+                <Text style={styles.summaryLabel}>ملخص المستخرج السريري (Clinical Extract):</Text>
+                <Text style={styles.summaryText}>{doc.summary}</Text>
+              </View>
+
+              <View style={styles.docCardFooter}>
+                <Text style={styles.docDate}>تاريخ التقرير: {doc.date}</Text>
+                <TouchableOpacity style={styles.viewDocBtn} activeOpacity={0.8}>
+                  <Text style={styles.viewDocBtnText}>عرض المستند الكامل ←</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Space at bottom for floating tab bar */}
+        <View style={{ height: 110 }} />
       </ScrollView>
+
+      {/* ── Category Selection Modal ── */}
+      <Modal visible={uploadModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>اختر نوع التقرير الطبي 📄</Text>
+              <TouchableOpacity onPress={() => setUploadModal(false)}>
+                <Text style={styles.modalClose}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.modalSub}>
+              يساعد تحديد النوع على توجيه نموذج الذكاء الاصطناعي لاستخراج القيم الدقيقة
+            </Text>
+
+            <View style={styles.categoryGrid}>
+              {[
+                {
+                  cat: 'Echo',
+                  label: 'إيكو القلب وسونار الأوعية',
+                  icon: '🫀',
+                  name: 'echo_followup_scan.pdf',
+                },
+                {
+                  cat: 'Lab',
+                  label: 'تحليل دم وغدة درقية (TSH)',
+                  icon: '🩸',
+                  name: 'tsh_blood_test.pdf',
+                },
+                {
+                  cat: 'Hearing',
+                  label: 'فحص السمع وضغط الأذن',
+                  icon: '👂',
+                  name: 'tympanometry_audiology.pdf',
+                },
+                {
+                  cat: 'Therapy',
+                  label: 'تقرير جلسة علاج طبيعي أو تخاطب',
+                  icon: '🏃',
+                  name: 'physio_assessment_report.pdf',
+                },
+              ].map((item, idx) => (
+                <TouchableOpacity
+                  key={idx}
+                  style={styles.categoryItem}
+                  onPress={() => simulateUpload(item.cat, item.label, item.icon, item.name)}
+                  activeOpacity={0.85}
+                >
+                  <Text style={{ fontSize: 28 }}>{item.icon}</Text>
+                  <Text style={styles.categoryItemLabel}>{item.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -150,123 +245,256 @@ export default function DocumentsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.canvasBase,
   },
-  header: {
+  ambientContainer: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  ambientOrb: {
+    position: 'absolute',
+    borderRadius: 999,
+  },
+  orbTop: {
+    top: -50,
+    right: -40,
+    width: 270,
+    height: 270,
+    backgroundColor: Colors.orbEmerald,
+  },
+  orbBottom: {
+    bottom: 90,
+    left: -50,
+    width: 250,
+    height: 250,
+    backgroundColor: Colors.orbSky,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'ios' ? 56 : 40,
+    gap: 16,
+  },
+
+  // Header Card
+  headerCard: {
+    backgroundColor: Colors.glassSurfaceElevated,
+    borderRadius: 28,
     padding: 20,
-    paddingTop: 50,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-    alignItems: 'flex-end',
+    borderWidth: 1.5,
+    borderColor: Colors.glassBorder,
+    gap: 12,
+    ...Shadows.glassElevated,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#0F172A',
-    textAlign: 'right',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: '#64748B',
-    textAlign: 'right',
-    marginBottom: 14,
-  },
-  uploadBtn: {
-    backgroundColor: '#2563EB',
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 12,
-    alignSelf: 'stretch',
-    alignItems: 'center',
-  },
-  uploadBtnText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  listContent: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  docCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 14,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  docTop: {
+  headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+  },
+  headerSub: {
+    fontSize: 11,
+    color: Colors.primary,
+    fontWeight: '700',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+    marginTop: 2,
+  },
+  shieldBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.primaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerDesc: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    lineHeight: 18,
+  },
+  uploadBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 18,
+    paddingVertical: 14,
+    alignItems: 'center',
+    ...Shadows.glowPrimary,
+    marginTop: 4,
+  },
+  uploadBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 13,
+  },
+
+  uploadingNotice: {
+    backgroundColor: Colors.glassSurfaceElevated,
+    borderColor: Colors.glassBorder,
+    borderWidth: 1.5,
+    borderRadius: 20,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    ...Shadows.glass,
+  },
+  uploadingNoticeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.primary,
+  },
+
+  // Document Card
+  docList: {
+    gap: 14,
+  },
+  docCard: {
+    backgroundColor: Colors.glassSurfaceElevated,
+    borderRadius: 26,
+    padding: 18,
+    borderWidth: 1.5,
+    borderColor: Colors.glassBorder,
+    gap: 12,
+    ...Shadows.glass,
+  },
+  docCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  docIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 16,
+    backgroundColor: Colors.canvasBase,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  docCategory: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+  },
+  docFileName: {
+    fontSize: 11,
+    color: Colors.textTertiary,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    marginTop: 2,
   },
   statusBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 999,
   },
-  statusBadgeSuccess: {
-    backgroundColor: '#DCFCE7',
+  statusCompleted: {
+    backgroundColor: Colors.primaryLight,
   },
-  statusBadgePending: {
-    backgroundColor: '#FEF3C7',
+  statusProcessing: {
+    backgroundColor: Colors.tertiaryLight,
   },
   statusBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 10,
+    fontWeight: '800',
   },
-  statusSuccessText: {
-    color: '#15803D',
+  statusTextCompleted: {
+    color: Colors.primary,
   },
-  statusPendingText: {
-    color: '#B45309',
-  },
-  categoryTag: {
-    backgroundColor: '#EFF6FF',
-    color: '#2563EB',
-    fontSize: 12,
-    fontWeight: '600',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  fileName: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#1E293B',
-    textAlign: 'right',
-    marginBottom: 4,
-  },
-  docDate: {
-    fontSize: 12,
-    color: '#94A3B8',
-    textAlign: 'right',
-    marginBottom: 10,
+  statusTextProcessing: {
+    color: Colors.tertiary,
   },
   summaryBox: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 10,
+    backgroundColor: Colors.glassSurfaceSubtle,
+    borderRadius: 16,
     padding: 12,
-    borderRightWidth: 3,
-    borderRightColor: '#2563EB',
+    borderWidth: 1,
+    borderColor: Colors.glassBorderSubtle,
+    gap: 4,
   },
-  summaryTitle: {
-    fontSize: 12,
+  summaryLabel: {
+    fontSize: 11,
     fontWeight: '700',
-    color: '#334155',
-    textAlign: 'right',
-    marginBottom: 4,
+    color: Colors.secondary,
   },
   summaryText: {
-    fontSize: 13,
-    color: '#475569',
-    textAlign: 'right',
+    fontSize: 12,
+    color: Colors.textSecondary,
     lineHeight: 18,
+  },
+  docCardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 4,
+  },
+  docDate: {
+    fontSize: 11,
+    color: Colors.textTertiary,
+  },
+  viewDocBtn: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  viewDocBtnText: {
+    fontSize: 12,
+    color: Colors.primary,
+    fontWeight: '800',
+  },
+
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(20, 30, 26, 0.45)',
+    justifyContent: 'flex-end',
+  },
+  modalCard: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    padding: 24,
+    gap: 14,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+  },
+  modalClose: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.textTertiary,
+    padding: 4,
+  },
+  modalSub: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    lineHeight: 18,
+  },
+  categoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginTop: 6,
+  },
+  categoryItem: {
+    width: '48%',
+    backgroundColor: Colors.canvasBase,
+    borderRadius: 20,
+    padding: 16,
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+  },
+  categoryItemLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    textAlign: 'center',
   },
 });

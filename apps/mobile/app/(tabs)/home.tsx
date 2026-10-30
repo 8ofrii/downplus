@@ -8,34 +8,39 @@ import {
   Modal,
   TextInput,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
+import { router } from 'expo-router';
+import { Colors, Shadows } from '../../constants/theme';
 import { api } from '../../services/api';
 
 export default function HomeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
+  const [emergencyModalVisible, setEmergencyModalVisible] = useState(false);
   const [noteType, setNoteType] = useState('general_observation');
   const [noteContent, setNoteContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  const [activeStep, setActiveStep] = useState(2); // Step 3 in progress
+
   const handleQuickLog = async () => {
     if (!noteContent.trim()) return;
     try {
       setSubmitting(true);
-      // Demo child ID
       await api.logCaseUpdate('demo-child-id', noteType, noteContent);
-      setSuccessMsg('تم حفظ الملاحظة بنجاح وإضافتها للخط الزمني!');
+      setSuccessMsg('تم حفظ الملاحظة وإضافتها للسجل المشترك مع الطبيب!');
       setNoteContent('');
       setTimeout(() => {
         setSuccessMsg(null);
         setModalVisible(false);
-      }, 1500);
+      }, 1400);
     } catch {
-      setSuccessMsg('تم الحفظ محلياً بنجاح!');
+      setSuccessMsg('تم حفظ الملاحظة محلياً بنجاح!');
       setTimeout(() => {
         setSuccessMsg(null);
         setModalVisible(false);
-      }, 1500);
+      }, 1400);
     } finally {
       setSubmitting(false);
     }
@@ -43,126 +48,211 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Child Header Profile Banner */}
-        <View style={styles.headerBanner}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>👶</Text>
+      {/* Ambient Soothing Light Orbs & Calming Backdrop Glows */}
+      <View style={styles.ambientContainer} pointerEvents="none">
+        <View style={[styles.ambientOrb, styles.orbTopRight]} />
+        <View style={[styles.ambientOrb, styles.orbMidLeft]} />
+        <View style={[styles.ambientOrb, styles.orbBottomRight]} />
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* ── 1. Top Child Header Bar (Serene Glass) ── */}
+        <View style={styles.childHeaderCard}>
+          <View style={styles.childHeaderLeft}>
+            <View style={styles.avatarContainer}>
+              <View style={styles.avatarInner}>
+                <Text style={styles.avatarEmoji}>👶</Text>
+              </View>
+              <View style={styles.verifiedBadge}>
+                <Text style={styles.verifiedCheck}>✓</Text>
+              </View>
+            </View>
+            <View style={styles.childMetaInfo}>
+              <View style={styles.nameRow}>
+                <Text style={styles.childArabicName}>عمر</Text>
+                <Text style={styles.childEnglishName}>(Omar)</Text>
+              </View>
+              <View style={styles.pillRow}>
+                <View style={styles.agePill}>
+                  <Text style={styles.agePillText}>🎂 سنتين و 4 أشهر</Text>
+                </View>
+                <View style={styles.karyotypePill}>
+                  <Text style={styles.karyotypePillText}>T21</Text>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.headerInfo}>
-            <Text style={styles.childName}>عمر أحمد</Text>
-            <Text style={styles.childMeta}>العمر: 31 شهراً • متلازمة داون (Trisomy 21)</Text>
-          </View>
+
+          {/* Emergency SOS Button (Soft Frosted Rose Glass) */}
+          <TouchableOpacity
+            style={styles.emergencyBtn}
+            onPress={() => setEmergencyModalVisible(true)}
+            activeOpacity={0.85}
+          >
+            <View style={styles.sosDot} />
+            <Text style={styles.emergencyBtnText}>طوارئ</Text>
+            <View style={styles.sosTag}>
+              <Text style={styles.sosTagText}>SOS</Text>
+            </View>
+          </TouchableOpacity>
         </View>
 
-        {/* Clinical Baseline Status Card */}
-        <View style={styles.baselineCard}>
-          <View style={styles.baselineHeader}>
-            <Text style={styles.badgePending}>مسودة ذكاء اصطناعي بانتظار اعتماد الطبيب</Text>
-            <Text style={styles.cardTitle}>ملخص الحالة السريرية</Text>
+        {/* ── 2. Urgent Clinical Supervision Hero Card ── */}
+        <View style={styles.urgentCard}>
+          <View style={styles.urgentCardTop}>
+            <View style={styles.urgentTag}>
+              <Text style={styles.urgentIcon}>🩺</Text>
+              <Text style={styles.urgentTagText}>المتابعة السريرية الدورية</Text>
+              <Text style={styles.urgentSubText}>(AAP Guidance)</Text>
+            </View>
+            <View style={styles.dueBadge}>
+              <View style={styles.dueDot} />
+              <Text style={styles.dueBadgeText}>مستحق الآن</Text>
+            </View>
           </View>
-          <Text style={styles.baselineSummary}>
-            • الحالات المشخصة: عيب قلبي تم إصلاحه (VSD)، قصور الغدة الدرقية.
-            {'\n'}• الأدوية الحالية: إيلتروكسين 25 ميكروجرام يومياً قبل الرضاعة.
-            {'\n'}• التطور الحركي: مرونة مفاصل عالية وضعف توتر عضلي (Hypotonia).
+
+          <Text style={styles.urgentTitle}>
+            فحص وظائف الغدة الدرقية (TSH) وفحص النظر السنوي
           </Text>
-        </View>
-
-        {/* 1. Next Due Checks (الفحوصات الطبية المستحقة) */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>الفحوصات الطبية الدورية المستحقة 🩺</Text>
-          <Text style={styles.sectionSubtitle}>حسب الدليل الإرشادي للأكاديمية الأمريكية لطب الأطفال (AAP)</Text>
-        </View>
-
-        <View style={styles.checkCard}>
-          <View style={styles.checkIcon}>
-            <Text style={{ fontSize: 24 }}>🩸</Text>
-          </View>
-          <View style={styles.checkDetails}>
-            <Text style={styles.checkTitle}>إعادة فحص وظائف الغدة الدرقية (TSH & FT4)</Text>
-            <Text style={styles.checkDate}>مستحق خلال: 3 أسابيع (الفحص السنوي)</Text>
-            <Text style={styles.checkDesc}>لضبط جرعة الإيلتروكسين مع زيادة وزن الطفل ومعدل نموه.</Text>
-          </View>
-        </View>
-
-        <View style={styles.checkCard}>
-          <View style={styles.checkIcon}>
-            <Text style={{ fontSize: 24 }}>👂</Text>
-          </View>
-          <View style={styles.checkDetails}>
-            <Text style={styles.checkTitle}>تخطيط طبلة الأذن وفحص السمع الشامل</Text>
-            <Text style={styles.checkDate}>مستحق عند عمر: 36 شهراً</Text>
-            <Text style={styles.checkDesc}>للتأكد من عدم وجود ارتشاح خلف الطبلة يؤثر على اكتساب الكلمات.</Text>
-          </View>
-        </View>
-
-        {/* 2. Weekly Skill Target (هدف المهارة الأسبوعي) */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>هدف المهارة لهذا الأسبوع 🎯</Text>
-          <Text style={styles.sectionSubtitle}>التركيز على مهارة واحدة يحقق نتائج أسرع</Text>
-        </View>
-
-        <View style={styles.targetCard}>
-          <View style={styles.targetBadge}>
-            <Text style={styles.targetBadgeText}>تطور حركي • سلم الاستقلالية</Text>
-          </View>
-          <Text style={styles.targetTitle}>الوقوف الحر لمدة 10 ثوانٍ دون مسك اليدين</Text>
-          <Text style={styles.targetDesc}>
-            تمرين مقترح: وضع لعبة مفضلة على طاولة منخفضة وتشجيع الطفل على التقاطها باليدين معاً مع ثبات القدمين بالأرض.
+          <Text style={styles.urgentDescription}>
+            Pediatric Thyroid Profile & Annual Vision Screen Due for Omar — موعد المراجعة الدورية المعتمد للأطفال ذوي متلازمة داون.
           </Text>
-          <View style={styles.targetProgress}>
-            <View style={styles.progressBar} />
+
+          <View style={styles.doctorPills}>
+            <View style={styles.doctorPill}>
+              <Text style={styles.doctorPillText}>👨‍⚕️ الموصى به: د. حازم القاضي</Text>
+            </View>
+            <View style={styles.doctorPill}>
+              <Text style={styles.doctorPillText}>📍 القاهرة الجديدة / التجمع</Text>
+            </View>
           </View>
-          <Text style={styles.progressStatusText}>الحالة الحالية: يحتاج مساعدة خفيفة (With Assistance)</Text>
+
+          <TouchableOpacity
+            style={styles.bookBtn}
+            activeOpacity={0.9}
+            onPress={() => router.push('/(tabs)/chat')}
+          >
+            <Text style={styles.bookBtnText}>حجز لدى شبكة معتمدة • استشارة فورية</Text>
+            <Text style={styles.bookBtnArrow}>←</Text>
+          </TouchableOpacity>
         </View>
+
+        {/* ── 3. Weekly Skill Goal Card (Independence Ladder) ── */}
+        <View style={styles.goalCard}>
+          <View style={styles.goalHeader}>
+            <View style={styles.goalHeaderLeft}>
+              <View style={styles.goalIconWrap}>
+                <Text style={styles.goalIconEmoji}>🥛</Text>
+              </View>
+              <View>
+                <Text style={styles.goalCategory}>سلم الاستقلالية اليومية • مهارة حركية دقيقة</Text>
+                <Text style={styles.goalSubCategory}>Daily Independence Ladder (Fine Motor)</Text>
+              </View>
+            </View>
+            <View style={styles.weekBadge}>
+              <Text style={styles.weekBadgeText}>هدف الأسبوع</Text>
+            </View>
+          </View>
+
+          <Text style={styles.goalTitle}>
+            الشرب المستقل من الكوب الصغير بكلتا اليدين بدون مساعدة
+          </Text>
+          <Text style={styles.goalDescription}>
+            هدف تدريبي لتنمية التناسق الحركي البصري وتقوية عضلات قبضة اليدين (Bilateral Grasp).
+          </Text>
+
+          {/* Micro-Steps Progress Track */}
+          <View style={styles.stepsContainer}>
+            <Text style={styles.stepsLabel}>خطوات التقدم المصغرة نحو الاستقلالية:</Text>
+            {[
+              { id: 0, text: 'مساعدة اليد على اليد في رفع الكوب بالفم', done: true },
+              { id: 1, text: 'إسناد خفيف من المرفقين مع شرب رشفة واحدة', done: true },
+              { id: 2, text: 'الإمساك الذاتي لمدة 5 ثوانٍ وإعادة الكوب للطاولة', done: false, inProgress: true },
+              { id: 3, text: 'شرب 3 رشفات كاملة بدون انسكاب بنسبة 80%', done: false },
+            ].map((step) => (
+              <TouchableOpacity
+                key={step.id}
+                style={[
+                  styles.stepItem,
+                  step.done && styles.stepDone,
+                  step.inProgress && styles.stepInProgress,
+                ]}
+                onPress={() => setActiveStep(step.id)}
+                activeOpacity={0.8}
+              >
+                <View style={[styles.stepCircle, step.done && styles.stepCircleDone]}>
+                  <Text style={styles.stepCircleText}>{step.done ? '✓' : step.id + 1}</Text>
+                </View>
+                <Text style={[styles.stepText, step.done && styles.stepTextDone]}>
+                  {step.text}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* ── 4. Quick Action Floating Glass Tiles ── */}
+        <View style={styles.actionsRow}>
+          <TouchableOpacity
+            style={styles.actionTile}
+            onPress={() => setModalVisible(true)}
+            activeOpacity={0.85}
+          >
+            <View style={[styles.actionIconWrap, { backgroundColor: Colors.primaryLight }]}>
+              <Text style={{ fontSize: 24 }}>📝</Text>
+            </View>
+            <Text style={styles.actionTitle}>تدوين ملاحظة سريعة</Text>
+            <Text style={styles.actionDesc}>مشاركة يومية مع الفريق الطبي</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionTile}
+            onPress={() => router.push('/(tabs)/documents')}
+            activeOpacity={0.85}
+          >
+            <View style={[styles.actionIconWrap, { backgroundColor: Colors.secondaryLight }]}>
+              <Text style={{ fontSize: 24 }}>📑</Text>
+            </View>
+            <Text style={styles.actionTitle}>رفع تقرير أو تحليل</Text>
+            <Text style={styles.actionDesc}>استخراج ذكي بـ OCR الفوري</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Space at bottom for floating tab bar */}
+        <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* 3. Quick Update Action FAB Button (زر التسجيل السريع) */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => setModalVisible(true)}
-      >
-        <Text style={styles.fabIcon}>✍️</Text>
-        <Text style={styles.fabText}>تسجيل ملاحظة فورية</Text>
-      </TouchableOpacity>
-
-      {/* Quick Update Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
+      {/* ── Quick Log Note Modal (Frosted Glass Sheet) ── */}
+      <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>تسجيل ملاحظة وتطور سريري سريع</Text>
-            <Text style={styles.modalSubtitle}>سيتم تدوين الملاحظة فوراً في الخط الزمني وربطها بسجل الطفل</Text>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>تدوين ملاحظة في السجل اليومي 📝</Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Text style={styles.modalClose}>✕</Text>
+              </TouchableOpacity>
+            </View>
 
-            {successMsg && <Text style={styles.successText}>{successMsg}</Text>}
+            <Text style={styles.modalSub}>
+              يتم حفظ الملاحظة وإتاحتها فوراً للطبيب المعالج في لوحة المتابعة
+            </Text>
 
-            {/* Type Selector */}
             <View style={styles.typeSelector}>
               {[
-                { key: 'skill_change', label: 'تطور مهارة 🪜' },
-                { key: 'medication_change', label: 'تغيير دواء 💊' },
-                { key: 'medical_incident', label: 'حادث طبي ⚠️' },
-                { key: 'general_observation', label: 'ملاحظة عامة 📝' },
-              ].map((item) => (
+                { key: 'general_observation', label: 'ملاحظة عامة' },
+                { key: 'milestone_progress', label: 'تطور مهارة' },
+                { key: 'therapy_note', label: 'جلسة تأهيل' },
+                { key: 'sleep_nutrition', label: 'نوم وتغذية' },
+              ].map((t) => (
                 <TouchableOpacity
-                  key={item.key}
-                  style={[
-                    styles.typeBtn,
-                    noteType === item.key && styles.typeBtnActive,
-                  ]}
-                  onPress={() => setNoteType(item.key)}
+                  key={t.key}
+                  style={[styles.typePill, noteType === t.key && styles.typePillActive]}
+                  onPress={() => setNoteType(t.key)}
                 >
                   <Text
-                    style={[
-                      styles.typeBtnText,
-                      noteType === item.key && styles.typeBtnTextActive,
-                    ]}
+                    style={[styles.typePillText, noteType === t.key && styles.typePillTextActive]}
                   >
-                    {item.label}
+                    {t.label}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -170,33 +260,79 @@ export default function HomeScreen() {
 
             <TextInput
               style={styles.textArea}
-              value={noteContent}
-              onChangeText={setNoteContent}
-              placeholder="اكتب ملاحظتك بالتفصيل (مثل: مشى 4 خطوات بمفرده، أو ظهور رشح وألم بالأذن)..."
-              placeholderTextColor="#94A3B8"
+              placeholder="اكتب ملاحظتك هنا (مثال: عمر بدأ يمسك الكوب بيدين اليوم لمدة 4 ثوانٍ مع تشجيع خفيف)..."
+              placeholderTextColor={Colors.textTertiary}
               multiline
               numberOfLines={4}
+              value={noteContent}
+              onChangeText={setNoteContent}
             />
 
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.saveBtn}
-                onPress={handleQuickLog}
-                disabled={submitting}
-              >
-                {submitting ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.saveBtnText}>حفظ الملاحظة</Text>
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.cancelBtn}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.cancelBtnText}>إلغاء</Text>
+            {successMsg && <Text style={styles.successMsg}>{successMsg}</Text>}
+
+            <TouchableOpacity
+              style={styles.submitBtn}
+              onPress={handleQuickLog}
+              disabled={submitting}
+            >
+              {submitting ? (
+                <ActivityIndicator color="#FFF" />
+              ) : (
+                <Text style={styles.submitBtnText}>حفظ وتحديث السجل</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── Emergency Hospital Mode SOS Modal ── */}
+      <Modal visible={emergencyModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.emergencyCard}>
+            <View style={styles.emergencyHeader}>
+              <View style={styles.emergencyHeaderLeft}>
+                <View style={styles.pulsingRedDot} />
+                <View>
+                  <Text style={styles.emergencyTitle}>بطاقة الطوارئ الطبية السريعة</Text>
+                  <Text style={styles.emergencySubTitle}>Hospital Emergency Passport (ER Mode)</Text>
+                </View>
+              </View>
+              <TouchableOpacity onPress={() => setEmergencyModalVisible(false)}>
+                <Text style={styles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
+
+            <View style={styles.emergencyBioBox}>
+              <View style={styles.bioRow}>
+                <Text style={styles.bioLabel}>فصيلة الدم:</Text>
+                <Text style={styles.bioValueHighlight}>O+ (Positive)</Text>
+              </View>
+              <View style={styles.bioRow}>
+                <Text style={styles.bioLabel}>الوضع القلبي:</Text>
+                <Text style={styles.bioValue}>جراحة تصحيح ثقب VSD (مستقر - وظيفة LV طبيعية)</Text>
+              </View>
+              <View style={styles.bioRow}>
+                <Text style={styles.bioLabel}>الأدوية الحالية:</Text>
+                <Text style={styles.bioValue}>إيلتروكسين 25 ميكروجرام يومياً (قصور درقية)</Text>
+              </View>
+              <View style={styles.bioRow}>
+                <Text style={styles.bioLabel}>الحساسيات:</Text>
+                <Text style={styles.bioValueSafe}>لا توجد حساسية دوائية مسجلة حتى الآن</Text>
+              </View>
+            </View>
+
+            <View style={styles.qrPlaceholder}>
+              <Text style={{ fontSize: 48 }}>📱</Text>
+              <Text style={styles.qrTokenText}>رمز الطوارئ الطبي الموحد: DP-9488-EG</Text>
+              <Text style={styles.qrDesc}>صالح لمسح طواقم الإسعاف والأطباء في المستشفى</Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.emergencyCloseBtn}
+              onPress={() => setEmergencyModalVisible(false)}
+            >
+              <Text style={styles.emergencyCloseBtnText}>إغلاق بطاقة الطوارئ</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -207,315 +343,628 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.canvasBase,
+  },
+  ambientContainer: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  ambientOrb: {
+    position: 'absolute',
+    borderRadius: 999,
+  },
+  orbTopRight: {
+    top: -50,
+    right: -50,
+    width: 260,
+    height: 260,
+    backgroundColor: Colors.orbEmerald,
+  },
+  orbMidLeft: {
+    top: 240,
+    left: -70,
+    width: 240,
+    height: 240,
+    backgroundColor: Colors.orbSky,
+  },
+  orbBottomRight: {
+    bottom: 80,
+    right: -60,
+    width: 260,
+    height: 260,
+    backgroundColor: Colors.orbAmber,
   },
   scrollContent: {
-    padding: 16,
-    paddingTop: 50,
-    paddingBottom: 90,
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'ios' ? 56 : 40,
+    gap: 16,
   },
-  headerBanner: {
-    flexDirection: 'row-reverse',
+
+  // Child Header Card
+  childHeaderCard: {
+    backgroundColor: Colors.glassSurfaceElevated,
+    borderRadius: 26,
+    padding: 16,
+    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    justifyContent: 'space-between',
+    borderWidth: 1.5,
+    borderColor: Colors.glassBorder,
+    ...Shadows.glass,
   },
-  avatar: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    backgroundColor: '#EFF6FF',
+  childHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  avatarContainer: {
+    position: 'relative',
+  },
+  avatarInner: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.primaryLight,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 14,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
-  avatarText: {
+  avatarEmoji: {
     fontSize: 28,
   },
-  headerInfo: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  childName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#0F172A',
-  },
-  childMeta: {
-    fontSize: 13,
-    color: '#64748B',
-    marginTop: 2,
-  },
-  baselineCard: {
-    backgroundColor: '#EFF6FF',
-    borderWidth: 1,
-    borderColor: '#BFDBFE',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
-  },
-  baselineHeader: {
-    alignItems: 'flex-end',
-    marginBottom: 8,
-  },
-  badgePending: {
-    backgroundColor: '#FEF3C7',
-    color: '#B45309',
-    fontSize: 11,
-    fontWeight: '700',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    overflow: 'hidden',
-    marginBottom: 4,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1E40AF',
-  },
-  baselineSummary: {
-    fontSize: 13,
-    color: '#1E3A8A',
-    lineHeight: 20,
-    textAlign: 'right',
-  },
-  sectionHeader: {
-    marginBottom: 12,
-    alignItems: 'flex-end',
-  },
-  sectionTitle: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: '#0F172A',
-  },
-  sectionSubtitle: {
-    fontSize: 12,
-    color: '#64748B',
-    marginTop: 2,
-  },
-  checkCard: {
-    flexDirection: 'row-reverse',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 1,
-  },
-  checkIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#F1F5F9',
+  verifiedBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    backgroundColor: Colors.primary,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 12,
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
   },
-  checkDetails: {
-    flex: 1,
-    alignItems: 'flex-end',
+  verifiedCheck: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '800',
   },
-  checkTitle: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#1E293B',
-    textAlign: 'right',
+  childMetaInfo: {
+    gap: 4,
   },
-  checkDate: {
-    fontSize: 12,
-    color: '#EA580C',
-    fontWeight: '700',
-    marginTop: 2,
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
-  checkDesc: {
-    fontSize: 12,
-    color: '#64748B',
-    marginTop: 4,
-    textAlign: 'right',
+  childArabicName: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: Colors.textPrimary,
   },
-  targetCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
-    borderRightWidth: 4,
-    borderRightColor: '#2563EB',
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 1,
+  childEnglishName: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    fontWeight: '600',
   },
-  targetBadge: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#F1F5F9',
+  pillRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  agePill: {
+    backgroundColor: Colors.primaryLight,
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 6,
-    marginBottom: 6,
+    borderRadius: 999,
   },
-  targetBadgeText: {
+  agePillText: {
+    color: Colors.primary,
     fontSize: 11,
-    color: '#475569',
-    fontWeight: '600',
+    fontWeight: '700',
   },
-  targetTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#0F172A',
-    textAlign: 'right',
-    marginBottom: 6,
+  karyotypePill: {
+    backgroundColor: Colors.secondaryLight,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
   },
-  targetDesc: {
-    fontSize: 13,
-    color: '#475569',
-    lineHeight: 18,
-    textAlign: 'right',
-    marginBottom: 12,
+  karyotypePillText: {
+    color: Colors.secondary,
+    fontSize: 11,
+    fontWeight: '700',
   },
-  targetProgress: {
-    height: 8,
-    backgroundColor: '#E2E8F0',
-    borderRadius: 4,
-    overflow: 'hidden',
-    marginBottom: 6,
-  },
-  progressBar: {
-    width: '60%',
-    height: '100%',
-    backgroundColor: '#2563EB',
-  },
-  progressStatusText: {
-    fontSize: 12,
-    color: '#2563EB',
-    fontWeight: '600',
-    textAlign: 'right',
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 20,
-    alignSelf: 'center',
-    backgroundColor: '#2563EB',
-    flexDirection: 'row-reverse',
+
+  // Emergency Button
+  emergencyBtn: {
+    backgroundColor: Colors.emergencyBg,
+    borderColor: Colors.emergencyBorder,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
+  },
+  sosDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.emergencyText,
+  },
+  emergencyBtnText: {
+    color: Colors.emergencyText,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  sosTag: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  sosTagText: {
+    color: Colors.emergencyText,
+    fontSize: 9,
+    fontWeight: '900',
+  },
+
+  // Urgent Clinical Check Hero Card
+  urgentCard: {
+    backgroundColor: Colors.glassSurfaceElevated,
+    borderRadius: 28,
+    padding: 20,
+    borderWidth: 1.5,
+    borderColor: Colors.glassBorder,
+    gap: 12,
+    ...Shadows.glass,
+  },
+  urgentCardTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  urgentTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  urgentIcon: {
+    fontSize: 16,
+  },
+  urgentTagText: {
+    color: Colors.primary,
+    fontWeight: '800',
+    fontSize: 13,
+  },
+  urgentSubText: {
+    color: Colors.textTertiary,
+    fontSize: 11,
+  },
+  dueBadge: {
+    backgroundColor: '#FEE2E2',
+    borderColor: '#FECACA',
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  dueDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#DC2626',
+  },
+  dueBadgeText: {
+    color: '#B91C1C',
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  urgentTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+    lineHeight: 24,
+  },
+  urgentDescription: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    lineHeight: 20,
+  },
+  doctorPills: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  doctorPill: {
+    backgroundColor: Colors.glassSurfaceSubtle,
+    borderColor: Colors.glassBorderSubtle,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+  },
+  doctorPillText: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    fontWeight: '600',
+  },
+  bookBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 18,
     paddingVertical: 14,
-    paddingHorizontal: 22,
-    borderRadius: 30,
-    shadowColor: '#2563EB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 6,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 4,
+    ...Shadows.glowPrimary,
   },
-  fabIcon: {
-    fontSize: 18,
-    marginLeft: 8,
-  },
-  fabText: {
+  bookBtnText: {
     color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: '800',
+    fontSize: 14,
   },
+  bookBtnArrow: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+
+  // Weekly Goal Card
+  goalCard: {
+    backgroundColor: Colors.glassSurfaceElevated,
+    borderRadius: 28,
+    padding: 20,
+    borderWidth: 1.5,
+    borderColor: Colors.glassBorder,
+    gap: 12,
+    ...Shadows.glass,
+  },
+  goalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  goalHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  goalIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    backgroundColor: Colors.tertiaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  goalIconEmoji: {
+    fontSize: 20,
+  },
+  goalCategory: {
+    color: Colors.tertiary,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  goalSubCategory: {
+    color: Colors.textTertiary,
+    fontSize: 11,
+  },
+  weekBadge: {
+    backgroundColor: Colors.tertiaryLight,
+    borderColor: Colors.tertiaryFixed,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  weekBadgeText: {
+    color: Colors.tertiary,
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  goalTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+    lineHeight: 22,
+  },
+  goalDescription: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    lineHeight: 19,
+  },
+  stepsContainer: {
+    gap: 8,
+    marginTop: 4,
+  },
+  stepsLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.textTertiary,
+    marginBottom: 4,
+  },
+  stepItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.65)',
+    borderRadius: 14,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+  },
+  stepDone: {
+    backgroundColor: Colors.primaryLight,
+    borderColor: Colors.primaryFixed,
+  },
+  stepInProgress: {
+    borderColor: Colors.tertiaryContainer,
+    borderWidth: 1.5,
+  },
+  stepCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: Colors.textTertiary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stepCircleDone: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  stepCircleText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+  },
+  stepText: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    fontWeight: '600',
+    flex: 1,
+  },
+  stepTextDone: {
+    color: Colors.primary,
+    fontWeight: '700',
+  },
+
+  // Actions Row
+  actionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionTile: {
+    flex: 1,
+    backgroundColor: Colors.glassSurfaceElevated,
+    borderRadius: 24,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: Colors.glassBorder,
+    alignItems: 'center',
+    gap: 6,
+    ...Shadows.glass,
+  },
+  actionIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  actionTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+    textAlign: 'center',
+  },
+  actionDesc: {
+    fontSize: 11,
+    color: Colors.textTertiary,
+    textAlign: 'center',
+  },
+
+  // Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(20, 30, 26, 0.4)',
     justifyContent: 'flex-end',
   },
-  modalContent: {
+  modalCard: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
     padding: 24,
+    gap: 14,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#0F172A',
-    textAlign: 'right',
-    marginBottom: 4,
+    fontWeight: '800',
+    color: Colors.textPrimary,
   },
-  modalSubtitle: {
+  modalClose: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.textTertiary,
+    padding: 4,
+  },
+  modalSub: {
     fontSize: 12,
-    color: '#64748B',
-    textAlign: 'right',
-    marginBottom: 16,
+    color: Colors.textSecondary,
   },
   typeSelector: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    marginBottom: 16,
   },
-  typeBtn: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 8,
+  typePill: {
+    backgroundColor: Colors.canvasBase,
+    borderColor: Colors.borderLight,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
-  typeBtnActive: {
-    backgroundColor: '#2563EB',
+  typePillActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
-  typeBtnText: {
+  typePillText: {
     fontSize: 12,
-    color: '#475569',
-    fontWeight: '600',
+    fontWeight: '700',
+    color: Colors.textSecondary,
   },
-  typeBtnTextActive: {
+  typePillTextActive: {
     color: '#FFFFFF',
   },
   textArea: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.canvasBase,
+    borderRadius: 16,
+    padding: 14,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    borderRadius: 12,
-    padding: 12,
-    fontSize: 14,
-    color: '#0F172A',
-    textAlign: 'right',
+    borderColor: Colors.borderLight,
+    fontSize: 13,
+    color: Colors.textPrimary,
     textAlignVertical: 'top',
     minHeight: 90,
-    marginBottom: 16,
   },
-  modalButtons: {
-    flexDirection: 'row-reverse',
-    gap: 12,
-  },
-  saveBtn: {
-    flex: 2,
-    backgroundColor: '#2563EB',
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  saveBtnText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 15,
-  },
-  cancelBtn: {
-    flex: 1,
-    backgroundColor: '#F1F5F9',
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  cancelBtnText: {
-    color: '#475569',
-    fontWeight: '600',
-    fontSize: 15,
-  },
-  successText: {
-    color: '#16A34A',
+  successMsg: {
+    color: Colors.primary,
+    fontSize: 12,
+    fontWeight: '700',
     textAlign: 'center',
-    marginBottom: 10,
+  },
+  submitBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 18,
+    paddingVertical: 14,
+    alignItems: 'center',
+    ...Shadows.glowPrimary,
+  },
+  submitBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 14,
+  },
+
+  // Emergency Modal
+  emergencyCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 32,
+    margin: 20,
+    padding: 24,
+    gap: 16,
+    ...Shadows.glassElevated,
+  },
+  emergencyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  emergencyHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  pulsingRedDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#DC2626',
+  },
+  emergencyTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+  },
+  emergencySubTitle: {
+    fontSize: 11,
+    color: Colors.textTertiary,
+  },
+  emergencyBioBox: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 16,
+    gap: 10,
+  },
+  bioRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  bioLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#991B1B',
+  },
+  bioValue: {
+    fontSize: 12,
+    color: Colors.textPrimary,
     fontWeight: '600',
+    flex: 1,
+    textAlign: 'left',
+    marginRight: 8,
+  },
+  bioValueHighlight: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#B91C1C',
+  },
+  bioValueSafe: {
+    fontSize: 12,
+    color: '#065F46',
+    fontWeight: '700',
+  },
+  qrPlaceholder: {
+    backgroundColor: Colors.canvasBase,
+    borderRadius: 20,
+    padding: 16,
+    alignItems: 'center',
+    gap: 4,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+  },
+  qrTokenText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    marginTop: 4,
+  },
+  qrDesc: {
+    fontSize: 11,
+    color: Colors.textTertiary,
+    textAlign: 'center',
+  },
+  emergencyCloseBtn: {
+    backgroundColor: Colors.emergencyText,
+    borderRadius: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  emergencyCloseBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 13,
   },
 });

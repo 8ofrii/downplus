@@ -10,26 +10,30 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { Colors, Shadows } from '../../constants/theme';
 import { api } from '../../services/api';
+
+interface DoctorCard {
+  doctor_id: string;
+  name: string;
+  specialty: string;
+  city: string;
+  fee: number;
+  match_score: number;
+}
 
 interface Message {
   id: string;
   sender: 'user' | 'assistant';
   text: string;
-  recommendedDoctors?: Array<{
-    doctor_id: string;
-    name: string;
-    specialty: string;
-    city: string;
-    match_score: number;
-  }>;
+  recommendedDoctors?: DoctorCard[];
 }
 
 const INITIAL_MESSAGES: Message[] = [
   {
     id: 'm1',
     sender: 'assistant',
-    text: 'أهلاً بك يا فندم في المساعد الذكي لـ Down Plus. أنا هنا لمساعدتك في فهم أي تطور حركي، تخاطبي، أو فحوصات طبية خاصة بطفلك بناءً على أحدث إرشادات طب الأطفال (AAP). كيف يمكنني دعمك اليوم؟',
+    text: 'أهلاً بك يا فندم في المساعد الذكي التخصصي لـ Down Plus 🩺.\nأنا هنا لدعمك في الإجابة على أي استفسارات تتعلق بتطور طفلك الحركي، التخاطبي، أو الفحوصات الطبية الدورية وفق الدليل السريري للأكاديمية الأمريكية لطب الأطفال (AAP).\n\nكيف يمكنني مساعدتك أنت وعمر اليوم؟',
   },
 ];
 
@@ -37,6 +41,7 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [bookedDoctor, setBookedDoctor] = useState<string | null>(null);
 
   const handleSend = async (presetText?: string) => {
     const textToSend = presetText || input;
@@ -49,7 +54,7 @@ export default function ChatScreen() {
     };
 
     setMessages((prev) => [...prev, userMsg]);
-    setInput('');
+    if (!presetText) setInput('');
     setLoading(true);
 
     try {
@@ -62,24 +67,33 @@ export default function ChatScreen() {
       };
       setMessages((prev) => [...prev, assistantMsg]);
     } catch {
-      // Offline fallback with doctor recommendation for demo
+      // Offline fallback with rich clinical demo response
       setTimeout(() => {
+        let fallbackReply =
+          'بناءً على ملف عمر السريري (31 شهراً - Trisomy 21)، يُنصح بالتركيز على تمارين تقوية عضلات الحوض والركبتين لدعم ثبات المشي. كما نذكرك بأن فحص الغدة الدرقية (TSH & FT4) مستحق هذا الشهر لضبط جرعة الإيلتروكسين.';
+
+        let docs: DoctorCard[] = [];
+        if (textToSend.includes('تأهيل') || textToSend.includes('مشي') || textToSend.includes('طبيب')) {
+          docs = [
+            {
+              doctor_id: 'd1',
+              name: 'د. هاني مصطفى',
+              specialty: 'استشاري تأهيل وعلاج طبيعي للأطفال',
+              city: 'الجيزة / المهندسين',
+              fee: 400,
+              match_score: 98,
+            },
+          ];
+        }
+
         const fallbackMsg: Message = {
           id: `a-${Date.now()}`,
           sender: 'assistant',
-          text: 'في متلازمة داون، يبلغ متوسط المشي المستقل عادة بين عمر سنتين إلى 3 سنوات بسبب مرونة المفاصل وضعف التوتر العضلي (Hypotonia). الخطوة السليمة حالياً تتضمن تقييم ثبات الحوض وعضلات الجذع عبر أخصائي علاج طبيعي للأطفال لتحديد الحاجة لدعامات كاحل خفيفة (SMOs) وتمارين التوازن.',
-          recommendedDoctors: [
-            {
-              doctor_id: 'doc-1',
-              name: 'د. هاني مصطفى',
-              specialty: 'استشاري تأهيل وعلاج طبيعي للأطفال',
-              city: 'الجيزة',
-              match_score: 0.94,
-            },
-          ],
+          text: fallbackReply,
+          recommendedDoctors: docs.length > 0 ? docs : undefined,
         };
         setMessages((prev) => [...prev, fallbackMsg]);
-      }, 800);
+      }, 700);
     } finally {
       setLoading(false);
     }
@@ -90,98 +104,155 @@ export default function ChatScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.container}
     >
-      <View style={styles.header}>
-        <View style={styles.securityBadge}>
-          <Text style={styles.securityBadgeText}>🔒 مشفر وخالٍ تماماً من بيانات الهوية (GDPR Safe)</Text>
-        </View>
-        <Text style={styles.title}>المساعد السريري الذكي (AI Copilot) 🤖</Text>
+      {/* Ambient background glow */}
+      <View style={styles.ambientContainer} pointerEvents="none">
+        <View style={[styles.ambientOrb, styles.orbTop]} />
+        <View style={[styles.ambientOrb, styles.orbBottom]} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.messagesList}>
+      {/* ── Top Clinical Header Bar ── */}
+      <View style={styles.headerBar}>
+        <View style={styles.headerLeft}>
+          <View style={styles.avatarBot}>
+            <Text style={{ fontSize: 20 }}>🩺</Text>
+          </View>
+          <View>
+            <View style={styles.headerTitleRow}>
+              <Text style={styles.headerTitle}>المستشار السريري الذكي</Text>
+              <View style={styles.activePill}>
+                <View style={styles.activeDot} />
+                <Text style={styles.activeText}>متصل</Text>
+              </View>
+            </View>
+            <Text style={styles.headerSub}>دليل AAP لمتلازمة داون • خصوصية سريرية تامة</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* ── Message Stream ── */}
+      <ScrollView contentContainerStyle={styles.messagesScroll} showsVerticalScrollIndicator={false}>
         {messages.map((m) => (
           <View
             key={m.id}
             style={[
-              styles.bubble,
-              m.sender === 'user' ? styles.bubbleUser : styles.bubbleAssistant,
+              styles.messageRow,
+              m.sender === 'user' ? styles.messageRowUser : styles.messageRowAssistant,
             ]}
           >
-            <Text
-              style={[
-                styles.bubbleText,
-                m.sender === 'user' ? styles.bubbleTextUser : styles.bubbleTextAssistant,
-              ]}
-            >
-              {m.text}
-            </Text>
-
-            {/* Embedded Doctor Match Cards */}
-            {m.recommendedDoctors && m.recommendedDoctors.length > 0 && (
-              <View style={styles.doctorCardsContainer}>
-                <Text style={styles.doctorSectionHeader}>الأطباء المطابقون للحالة (Matrix Match):</Text>
-                {m.recommendedDoctors.map((doc) => (
-                  <View key={doc.doctor_id} style={styles.doctorCard}>
-                    <View style={styles.docAvatar}>
-                      <Text style={{ fontSize: 20 }}>👨‍⚕️</Text>
-                    </View>
-                    <View style={styles.docInfo}>
-                      <Text style={styles.docName}>{doc.name}</Text>
-                      <Text style={styles.docSpec}>{doc.specialty}</Text>
-                      <Text style={styles.docCity}>📍 {doc.city}</Text>
-                    </View>
-                    <View style={styles.matchScoreBadge}>
-                      <Text style={styles.matchScoreText}>{Math.round(doc.match_score * 100)}% تطابق</Text>
-                    </View>
-                  </View>
-                ))}
+            {m.sender === 'assistant' && (
+              <View style={styles.bubbleAvatar}>
+                <Text style={{ fontSize: 16 }}>🧬</Text>
               </View>
             )}
+
+            <View
+              style={[
+                styles.bubble,
+                m.sender === 'user' ? styles.bubbleUser : styles.bubbleAssistant,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.bubbleText,
+                  m.sender === 'user' ? styles.bubbleTextUser : styles.bubbleTextAssistant,
+                ]}
+              >
+                {m.text}
+              </Text>
+
+              {/* Recommended Doctors Embedded Cards */}
+              {m.recommendedDoctors && m.recommendedDoctors.length > 0 && (
+                <View style={styles.doctorsSection}>
+                  <Text style={styles.doctorsSectionTitle}>الأطباء الشركاء المقترحون للحالة 🩺:</Text>
+                  {m.recommendedDoctors.map((doc) => (
+                    <View key={doc.doctor_id} style={styles.docCard}>
+                      <View style={styles.docCardTop}>
+                        <View style={styles.docAvatar}>
+                          <Text style={{ fontSize: 22 }}>👨‍⚕️</Text>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.docName}>{doc.name}</Text>
+                          <Text style={styles.docSpec}>{doc.specialty}</Text>
+                          <Text style={styles.docCity}>📍 {doc.city}</Text>
+                        </View>
+                        <View style={styles.matchScoreBadge}>
+                          <Text style={styles.matchScoreText}>{doc.match_score}% تطابق</Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.docCardBottom}>
+                        <Text style={styles.docFee}>سعر الكشف: {doc.fee} ج.م</Text>
+                        <TouchableOpacity
+                          style={[
+                            styles.bookDocBtn,
+                            bookedDoctor === doc.doctor_id && styles.bookDocBtnDone,
+                          ]}
+                          onPress={() => setBookedDoctor(doc.doctor_id)}
+                          activeOpacity={0.85}
+                        >
+                          <Text style={styles.bookDocBtnText}>
+                            {bookedDoctor === doc.doctor_id ? 'تم طلب الموعد ✓' : 'حجز موعد الآن'}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
           </View>
         ))}
 
         {loading && (
-          <View style={[styles.bubble, styles.bubbleAssistant]}>
-            <ActivityIndicator color="#2563EB" size="small" />
-            <Text style={styles.thinkingText}>جاري مراجعة السياق السريري والإرشادات الطبية...</Text>
+          <View style={styles.loadingRow}>
+            <View style={styles.loadingBubble}>
+              <ActivityIndicator color={Colors.primary} size="small" />
+              <Text style={styles.loadingText}>جاري مراجعة البروتوكول السريري...</Text>
+            </View>
           </View>
         )}
+
+        <View style={{ height: 16 }} />
       </ScrollView>
 
-      {/* Suggested Quick Prompts */}
-      <View style={styles.promptBar}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <TouchableOpacity
-            style={styles.presetChip}
-            onPress={() =>
-              handleSend('عمر عنده سنتين ونصف ولسه مش بيمشي وبيقع كتير، إيه الخطوة ومين دكتور في الجيزة؟')
-            }
-          >
-            <Text style={styles.presetChipText}>👶 لسه مش بيمشي ومين دكتور بالجيزة؟</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.presetChip}
-            onPress={() => handleSend('متى يجب تكرار تحليل الغدة الدرقية؟')}
-          >
-            <Text style={styles.presetChipText}>🩸 موعد تحليل الغدة الدرقية القادم</Text>
-          </TouchableOpacity>
+      {/* ── Preset Prompt Suggestion Pills ── */}
+      <View style={styles.presetsContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.presetsScroll}>
+          {[
+            'تمارين تقوية عضلات الجذع والمشي 🏃',
+            'فحص الغدة الدرقية السنوي (TSH) 🩸',
+            'كيف نطور الكلمات الأولى والإشارات؟ 🗣️',
+          ].map((prompt, idx) => (
+            <TouchableOpacity
+              key={idx}
+              style={styles.presetPill}
+              onPress={() => handleSend(prompt)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.presetPillText}>{prompt}</Text>
+            </TouchableOpacity>
+          ))}
         </ScrollView>
       </View>
 
+      {/* ── Floating Glass Input Bar ── */}
       <View style={styles.inputBar}>
-        <TouchableOpacity
-          style={styles.sendBtn}
-          onPress={() => handleSend()}
-          disabled={loading}
-        >
-          <Text style={styles.sendBtnText}>إرسال</Text>
-        </TouchableOpacity>
         <TextInput
-          style={styles.chatInput}
+          style={styles.inputField}
+          placeholder="اسأل المستشار الطبي عن تطور عمر أو الفحوصات..."
+          placeholderTextColor={Colors.textTertiary}
           value={input}
           onChangeText={setInput}
-          placeholder="اسأل المساعد عن أي تطور أو استشارة..."
-          placeholderTextColor="#94A3B8"
+          onSubmitEditing={() => handleSend()}
         />
+        <TouchableOpacity
+          style={styles.sendButton}
+          onPress={() => handleSend()}
+          activeOpacity={0.85}
+          disabled={!input.trim()}
+        >
+          <Text style={styles.sendButtonText}>إرسال</Text>
+        </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
@@ -190,54 +261,135 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.canvasBase,
   },
-  header: {
-    padding: 16,
-    paddingTop: 50,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+  ambientContainer: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  ambientOrb: {
+    position: 'absolute',
+    borderRadius: 999,
+  },
+  orbTop: {
+    top: -50,
+    right: -40,
+    width: 270,
+    height: 270,
+    backgroundColor: Colors.orbEmerald,
+  },
+  orbBottom: {
+    bottom: 90,
+    left: -50,
+    width: 250,
+    height: 250,
+    backgroundColor: Colors.orbSky,
+  },
+
+  // Header Bar
+  headerBar: {
+    paddingTop: Platform.OS === 'ios' ? 56 : 40,
+    paddingHorizontal: 16,
+    paddingBottom: 14,
+    backgroundColor: Colors.glassSurfaceElevated,
+    borderBottomWidth: 1.5,
+    borderBottomColor: Colors.glassBorder,
+    ...Shadows.glass,
+  },
+  headerLeft: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
   },
-  securityBadge: {
-    backgroundColor: '#ECFDF5',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-    marginBottom: 6,
+  avatarBot: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.primaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
   },
-  securityBadgeText: {
-    fontSize: 11,
-    color: '#059669',
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+  },
+  activePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: Colors.primaryLight,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 999,
+  },
+  activeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.primary,
+  },
+  activeText: {
+    fontSize: 10,
     fontWeight: '700',
+    color: Colors.primary,
   },
-  title: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: '#0F172A',
+  headerSub: {
+    fontSize: 11,
+    color: Colors.textSecondary,
+    marginTop: 2,
   },
-  messagesList: {
-    padding: 16,
+
+  // Messages
+  messagesScroll: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
     paddingBottom: 20,
+    gap: 14,
+  },
+  messageRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  messageRowUser: {
+    justifyContent: 'flex-end',
+  },
+  messageRowAssistant: {
+    justifyContent: 'flex-start',
+  },
+  bubbleAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.primaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 4,
   },
   bubble: {
-    maxWidth: '85%',
-    padding: 14,
-    borderRadius: 18,
-    marginBottom: 12,
+    maxWidth: '82%',
+    borderRadius: 24,
+    padding: 16,
+    borderWidth: 1.5,
+    ...Shadows.glass,
   },
   bubbleUser: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#2563EB',
-    borderBottomLeftRadius: 4,
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+    borderBottomRightRadius: 6,
   },
   bubbleAssistant: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#FFFFFF',
-    borderBottomRightRadius: 4,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    backgroundColor: Colors.glassSurfaceElevated,
+    borderColor: Colors.glassBorder,
+    borderBottomLeftRadius: 6,
   },
   bubbleText: {
     fontSize: 14,
@@ -245,126 +397,176 @@ const styles = StyleSheet.create({
   },
   bubbleTextUser: {
     color: '#FFFFFF',
-    textAlign: 'right',
+    fontWeight: '600',
   },
   bubbleTextAssistant: {
-    color: '#1E293B',
-    textAlign: 'right',
+    color: Colors.textPrimary,
   },
-  thinkingText: {
-    fontSize: 12,
-    color: '#64748B',
-    marginTop: 6,
-    textAlign: 'center',
-  },
-  doctorCardsContainer: {
-    marginTop: 12,
+
+  // Doctors Inside Chat
+  doctorsSection: {
+    marginTop: 14,
+    paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
-    paddingTop: 10,
+    borderTopColor: Colors.borderLight,
+    gap: 10,
   },
-  doctorSectionHeader: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#2563EB',
-    textAlign: 'right',
-    marginBottom: 8,
+  doctorsSectionTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: Colors.primary,
   },
-  doctorCard: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    padding: 10,
+  docCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 14,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 6,
+    borderColor: Colors.borderLight,
+    gap: 10,
+  },
+  docCardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   docAvatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#EFF6FF',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.canvasBase,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 10,
-  },
-  docInfo: {
-    flex: 1,
-    alignItems: 'flex-end',
   },
   docName: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    color: '#0F172A',
+    fontSize: 14,
+    fontWeight: '800',
+    color: Colors.textPrimary,
   },
   docSpec: {
     fontSize: 11,
-    color: '#475569',
+    color: Colors.textSecondary,
+    fontWeight: '600',
   },
   docCity: {
-    fontSize: 10,
-    color: '#64748B',
-    marginTop: 2,
+    fontSize: 11,
+    color: Colors.textTertiary,
   },
   matchScoreBadge: {
-    backgroundColor: '#DCFCE7',
+    backgroundColor: Colors.primaryLight,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: 999,
   },
   matchScoreText: {
     fontSize: 11,
-    fontWeight: 'bold',
-    color: '#15803D',
+    fontWeight: '800',
+    color: Colors.primary,
   },
-  promptBar: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
-  },
-  presetChip: {
-    backgroundColor: '#EFF6FF',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    marginRight: 8,
-  },
-  presetChipText: {
-    fontSize: 12,
-    color: '#2563EB',
-    fontWeight: '600',
-  },
-  inputBar: {
+  docCardBottom: {
     flexDirection: 'row',
-    padding: 12,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingTop: 6,
+    borderTopWidth: 1,
+    borderTopColor: Colors.canvasBase,
   },
-  chatInput: {
-    flex: 1,
-    backgroundColor: '#F1F5F9',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: '#0F172A',
-    textAlign: 'right',
+  docFee: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.textPrimary,
   },
-  sendBtn: {
-    backgroundColor: '#2563EB',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    marginRight: 8,
+  bookDocBtn: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 999,
   },
-  sendBtnText: {
+  bookDocBtnDone: {
+    backgroundColor: '#059669',
+  },
+  bookDocBtnText: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+
+  // Loading
+  loadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  loadingBubble: {
+    backgroundColor: Colors.glassSurfaceElevated,
+    borderColor: Colors.glassBorder,
+    borderWidth: 1.5,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    ...Shadows.glass,
+  },
+  loadingText: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+  },
+
+  // Presets
+  presetsContainer: {
+    paddingVertical: 6,
+    backgroundColor: 'transparent',
+  },
+  presetsScroll: {
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  presetPill: {
+    backgroundColor: Colors.glassSurfaceElevated,
+    borderColor: Colors.glassBorder,
+    borderWidth: 1.5,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    ...Shadows.glass,
+  },
+  presetPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.textSecondary,
+  },
+
+  // Input Bar
+  inputBar: {
+    marginBottom: Platform.OS === 'ios' ? 90 : 80,
+    marginHorizontal: 14,
+    backgroundColor: Colors.glassSurfaceElevated,
+    borderRadius: 28,
+    padding: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: Colors.glassBorder,
+    ...Shadows.glassElevated,
+  },
+  inputField: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    fontSize: 13,
+    color: Colors.textPrimary,
+  },
+  sendButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 22,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    ...Shadows.glowPrimary,
+  },
+  sendButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 13,
   },
 });
