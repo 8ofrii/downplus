@@ -53,6 +53,16 @@ export default function HomePage() {
             </p>
           </div>
         </Link>
+
+        <a href="/presentation.html" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+          <div style={{ backgroundColor: '#F0FDF4', padding: 28, borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1.5px solid #BBF7D0', cursor: 'pointer' }}>
+            <div style={{ fontSize: 32, marginBottom: 14 }}>📊</div>
+            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#166534', marginBottom: 8 }}>العرض التقديمي للمستثمرين (Deck)</h3>
+            <p style={{ fontSize: 14, color: '#15803D', lineHeight: 1.6 }}>
+              عرض استراتيجي وتجاري تفاعلي يشمل دراسة الجدوى، الهندسة السريرية، وخطة التوسع.
+            </p>
+          </div>
+        </a>
       </div>
     </div>
   );
