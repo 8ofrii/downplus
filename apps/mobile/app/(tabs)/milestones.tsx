@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,8 +7,10 @@ import {
   StyleSheet,
   Modal,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { Colors, Shadows } from '../../constants/theme';
+import { api } from '../../services/api';
 
 interface Milestone {
   id: string;
@@ -23,74 +25,94 @@ interface Milestone {
 
 const INITIAL_SKILLS: Milestone[] = [
   {
-    id: 'm1',
-    domain: 'gross_motor',
-    domainLabel: 'حركي كبير',
+    id: '85ff9210-2253-45cf-8d9a-23b413a7cec8',
+    domain: 'motor',
+    domainLabel: '🏃 حركي كبير',
     title: 'الجلوس المستقل دون مساعدة ويداه حرتان',
     desc: 'يجلس على الأرض بمفرده وتوازنه مستقر أثناء اللعب بالكرات أو المكعبات.',
     status: 'independent',
-    ageRange: '9 - 14 شهراً',
+    ageRange: '6 - 12 شهراً',
     tips: 'تم الإتقان بالكامل! حافظ على ألعاب تقوية عضلات الجذع (Core stability).',
   },
   {
-    id: 'm2',
-    domain: 'gross_motor',
-    domainLabel: 'حركي كبير',
-    title: 'المشي بالاستناد على الأثاث (Cruising)',
-    desc: 'يتحرك بخطوات جانبية واثقة مستنداً على الأريكة أو الطاولة المنخفضة.',
+    id: '9013c84b-2e44-45fc-905f-095017ac7dd3',
+    domain: 'motor',
+    domainLabel: '🏃 حركي كبير',
+    title: 'الوقوف والمشي بالاستناد على الأثاث (Cruising)',
+    desc: 'يقف مستنداً على الطاولة أو الأريكة ويتحرك بخطوات جانبية واثقة.',
     status: 'with_assistance',
-    ageRange: '15 - 24 شهراً',
+    ageRange: '12 - 24 شهراً',
     tips: 'ضع ألعاباً جذابة على مسافات قصيرة لتشجيعه على نقل وزنه بين القدمين.',
   },
   {
-    id: 'm3',
-    domain: 'gross_motor',
-    domainLabel: 'حركي كبير',
-    title: 'المشي المستقل 10 خطوات متتالية',
-    desc: 'يمشي بمفرده عبر الغرفة دون مسك الأيدي بتوازن ثابت.',
+    id: 'c0f439ae-3d54-4752-a887-6c4a3f7cdf5c',
+    domain: 'motor',
+    domainLabel: '🏃 حركي كبير',
+    title: 'المشي المستقل عبر الغرفة دون مساعدة',
+    desc: 'يمشي بمفرده دون مسك الأيدي لمسافة لا تقل عن 10 خطوات متتالية بتوازن.',
     status: 'not_started',
-    ageRange: '20 - 32 شهراً',
-    tips: 'استخدم مشاية الدفع الموزونة (Push walker) لتدريب توازن القدمين.',
+    ageRange: '24 - 36 شهراً',
+    tips: 'استخدم مشاية الدفع الموزونة (Push walker) لتدريب توازن عضلات الحوض.',
   },
   {
-    id: 'f1',
-    domain: 'fine_motor',
-    domainLabel: 'حركي دقيق',
+    id: 'b6d0bd40-0125-4203-b2f0-b353ca96a911',
+    domain: 'self_care',
+    domainLabel: '🥣 رعاية ذاتية',
     title: 'الشرب المستقل من كوب صغير بكلتا اليدين',
     desc: 'يرفع الكوب الصغير لفمه ويرتشف الماء دون انسكاب ويعيده للطاولة.',
     status: 'with_assistance',
-    ageRange: '18 - 28 شهراً',
-    tips: 'هدف الأسبوع الحالي! ابدأ بكميات صغيرة من الماء الدافئ أو العصير الخفيف.',
+    ageRange: '15 - 26 شهراً',
+    tips: 'هدف الأسبوع الحالي! ابدأ بكميات صغيرة من الماء الدافئ في كوب سيليكون خفيف.',
   },
   {
-    id: 's1',
-    domain: 'speech',
-    domainLabel: 'تخاطب وتواصل',
-    title: 'استخدام 5 كلمات وإشارات وظيفية (ماما، ماء، باي)',
-    desc: 'يوظف الكلمات أو إشارات Makaton للتعبير عن الاحتياج ورغباته اليومية.',
+    id: 'f1a17531-7b0a-488f-ade1-cc07cb5a0ea1',
+    domain: 'self_care',
+    domainLabel: '🥣 رعاية ذاتية',
+    title: 'المشاركة في خلع الجوارب والحذاء ذي اللاصق',
+    desc: 'يمسك بلاصق الحذاء ويفتحه ثم يخلع الحذاء والجوارب بمفرده عند العودة للمنزل.',
     status: 'independent',
-    ageRange: '16 - 26 شهراً',
-    tips: 'كرر أسماء الأشياء بإيقاع نغمي بطيء مع التواصل البصري المستمر.',
+    ageRange: '18 - 30 شهراً',
+    tips: 'عزز حس الاستقلالية وامتدحه فور إتمام الخطوة بنجاح لبناء الثقة الذاتية.',
   },
   {
-    id: 's2',
-    domain: 'speech',
-    domainLabel: 'تخاطب وتواصل',
-    title: 'تركيب جملة من كلمتين (عايز ماء / هات كرة)',
-    desc: 'يجمع بين كلمتين أو إشارة وكلمة للتعبير عن فكرة متكاملة.',
+    id: 'f439edc9-7f4f-47f0-9180-b67339c7e946',
+    domain: 'speech_language',
+    domainLabel: '🗣️ تخاطب وتواصل',
+    title: 'استخدام 3-5 كلمات وإشارات وظيفية للتعبير',
+    desc: 'يوظف كلمات واضحة أو إشارات Makaton للطلب والتعبير (ماما، بابا، ماء، باي).',
+    status: 'independent',
+    ageRange: '12 - 24 شهراً',
+    tips: 'كرر أسماء الأشياء بإيقاع نغمي هادئ وبطيء مع تعزيز التواصل البصري المستمر.',
+  },
+  {
+    id: '2cb92649-617c-43df-9d6f-d99d86dcf0b8',
+    domain: 'speech_language',
+    domainLabel: '🗣️ تخاطب وتواصل',
+    title: 'تركيب جملة من كلمتين (مثل: عايز ماء / هات كرة)',
+    desc: 'يجمع بين كلمتين أو إشارة وكلمة للتعبير عن فكرة متكاملة واحتياج فوري.',
     status: 'not_started',
     ageRange: '24 - 36 شهراً',
     tips: 'شجعه بانتظار الإشارة والكلمة قبل تلبية الطلب لبناء الدافع التواصلي.',
   },
   {
-    id: 'c1',
-    domain: 'self_care',
-    domainLabel: 'رعاية ذاتية',
-    title: 'المشاركة في خلع الجوارب والحذاء ذي اللاصق',
-    desc: 'يمسك بلاصق الحذاء ويفتحه ثم يخلع الحذاء بمفرده عند الوصول للمنزل.',
+    id: 'fb7dc121-1bd5-4926-9a71-219ae6730f91',
+    domain: 'cognitive',
+    domainLabel: '🧩 إدراكي ومعرفي',
+    title: 'مفهوم ثبات الأشياء والبحث عن لعبة مخفية',
+    desc: 'يبحث بنشاط عن لعبة مغطاة جزئياً أو كلياً تحت قطعة قماش أو صندوق.',
     status: 'independent',
-    ageRange: '18 - 30 شهراً',
-    tips: 'عزز حس الاستقلالية ومدحه فور إتمام الخطوة بنجاح.',
+    ageRange: '6 - 18 شهراً',
+    tips: 'لعبة الاختباء وتغطية الألعاب تطور التركيز البصري والذاكرة العاملة للطفل.',
+  },
+  {
+    id: '18586387-76fa-4a84-8501-66ffca47f619',
+    domain: 'health_check',
+    domainLabel: '🩺 فحص طبي AAP',
+    title: 'تحليل وظائف الغدة الدرقية السنوي (TSH & Free T4)',
+    desc: 'فحص دم سريري دوري للتأكد من سلامة الغدة الدرقية حسب توصيات AAP.',
+    status: 'with_assistance',
+    ageRange: 'سنوي (مستحق الآن)',
+    tips: 'مستحق في عمر 30-36 شهراً — موعد الفحص مجدول خلال الأسبوع القادم.',
   },
 ];
 
@@ -98,19 +120,59 @@ export default function MilestonesScreen() {
   const [skills, setSkills] = useState<Milestone[]>(INITIAL_SKILLS);
   const [activeFilter, setActiveFilter] = useState('all');
   const [celebrateModal, setCelebrateModal] = useState<Milestone | null>(null);
+  const [syncingId, setSyncingId] = useState<string | null>(null);
 
-  const toggleSkillStatus = (id: string) => {
-    setSkills((prev) =>
-      prev.map((s) => {
-        if (s.id !== id) return s;
-        if (s.status === 'not_started') return { ...s, status: 'with_assistance' };
-        if (s.status === 'with_assistance') {
-          setCelebrateModal(s);
-          return { ...s, status: 'independent' };
+  useEffect(() => {
+    // Sync with backend on mount
+    const fetchProgress = async () => {
+      try {
+        const progressList = await api.getMilestones(api.getActiveChildId());
+        if (Array.isArray(progressList) && progressList.length > 0) {
+          setSkills((prev) =>
+            prev.map((s) => {
+              const found = progressList.find(
+                (p: any) => p.milestoneId === s.id || p.milestone?.id === s.id,
+              );
+              if (found && found.status) {
+                return { ...s, status: found.status };
+              }
+              return s;
+            }),
+          );
         }
-        return { ...s, status: 'not_started' };
-      }),
-    );
+      } catch {
+        // Fallback to initial local state seamlessly
+      }
+    };
+    fetchProgress();
+  }, []);
+
+  const toggleSkillStatus = async (id: string) => {
+    const current = skills.find((s) => s.id === id);
+    if (!current) return;
+
+    let nextStatus: 'independent' | 'with_assistance' | 'not_started' = 'with_assistance';
+    if (current.status === 'not_started') {
+      nextStatus = 'with_assistance';
+    } else if (current.status === 'with_assistance') {
+      nextStatus = 'independent';
+      setCelebrateModal(current);
+    } else {
+      nextStatus = 'not_started';
+    }
+
+    // Optimistic UI update
+    setSkills((prev) => prev.map((s) => (s.id === id ? { ...s, status: nextStatus } : s)));
+
+    // Background backend sync
+    try {
+      setSyncingId(id);
+      await api.updateMilestone(api.getActiveChildId(), id, nextStatus);
+    } catch (e) {
+      console.log('Syncing milestone update to backend:', e);
+    } finally {
+      setSyncingId(null);
+    }
   };
 
   const filteredSkills =
@@ -172,10 +234,11 @@ export default function MilestonesScreen() {
         >
           {[
             { key: 'all', label: 'كافة المهارات (الكل)' },
-            { key: 'gross_motor', label: '🏃 حركي كبير' },
-            { key: 'fine_motor', label: '✋ حركي دقيق' },
-            { key: 'speech', label: '🗣️ تخاطب وتواصل' },
+            { key: 'motor', label: '🏃 حركي' },
             { key: 'self_care', label: '🥣 رعاية ذاتية' },
+            { key: 'speech_language', label: '🗣️ تخاطب وتواصل' },
+            { key: 'cognitive', label: '🧩 إدراكي ومعرفي' },
+            { key: 'health_check', label: '🩺 فحوصات AAP' },
           ].map((f) => (
             <TouchableOpacity
               key={f.key}

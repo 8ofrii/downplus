@@ -28,7 +28,7 @@ export default function HomeScreen() {
     if (!noteContent.trim()) return;
     try {
       setSubmitting(true);
-      await api.logCaseUpdate('demo-child-id', noteType, noteContent);
+      await api.logCaseUpdate(api.getActiveChildId(), noteType, noteContent);
       setSuccessMsg('تم حفظ الملاحظة وإضافتها للسجل المشترك مع الطبيب!');
       setNoteContent('');
       setTimeout(() => {

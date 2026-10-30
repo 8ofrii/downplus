@@ -25,7 +25,7 @@ export class OpenRouterService {
     this.baseUrl =
       this.configService.get<string>('OPENROUTER_BASE_URL') || 'https://openrouter.ai/api/v1';
     this.defaultModel =
-      this.configService.get<string>('OPENROUTER_DEFAULT_MODEL') || 'google/gemini-2.0-flash';
+      this.configService.get<string>('OPENROUTER_DEFAULT_MODEL') || 'google/gemini-3.5-flash';
   }
 
   /**

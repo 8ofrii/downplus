@@ -8,6 +8,7 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
+  Linking,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Colors, Shadows } from '../../constants/theme';
@@ -20,7 +21,7 @@ export default function ProfileScreen() {
   const handleGenerateShareLink = async () => {
     try {
       setSharing(true);
-      const res = await api.generateShareToken('demo-child-id', 48);
+      const res = await api.generateShareToken(api.getActiveChildId(), 48);
       setShareData(res);
       Alert.alert(
         'تم إنشاء رابط المشاركة المشفر بنجاح 🔗',
@@ -38,8 +39,20 @@ export default function ProfileScreen() {
 
   const handleExportPassport = () => {
     Alert.alert(
-      'تصدير جواز الحياة الطبي (Life Passport PDF) 🛂',
-      'تم إنشاء ملف PDF المتكامل لعمر متضمناً:\n• التشخيص الوراثي والتاريخ القلبي VSD\n• جرعة الإيلتروكسين المحدثة\n• خطة الأكاديمية الأمريكية AAP والمهارات المكتسبة\n\nجاهز للطباعة أو الإرسال لفرق الطوارئ.',
+      'تصدير وثيقة جواز الحياة الطبي (PDF) 🛂',
+      'وثيقة السجل الطبي الموحد لعمر جاهزة للطباعة والتحميل بتنسيق A4 الرسمي للطوارئ والمستشفيات.\n\nهل ترغب بفتح الوثيقة الآن للطباعة أو الحفظ؟',
+      [
+        { text: 'إلغاء', style: 'cancel' },
+        {
+          text: 'فتح الوثيقة للطباعة 🖨️',
+          onPress: () => {
+            const passportUrl = 'http://192.168.1.13:3001/passport/61871691-0784-4f0f-87de-f407f323a44d';
+            Linking.openURL(passportUrl).catch(() => {
+              Alert.alert('رابط الوثيقة', passportUrl);
+            });
+          },
+        },
+      ],
     );
   };
 

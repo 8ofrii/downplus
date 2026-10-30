@@ -58,7 +58,7 @@ export default function ChatScreen() {
     setLoading(true);
 
     try {
-      const res = await api.sendChatMessage('demo-child-id', textToSend);
+      const res = await api.sendChatMessage(api.getActiveChildId(), textToSend);
       const assistantMsg: Message = {
         id: `a-${Date.now()}`,
         sender: 'assistant',

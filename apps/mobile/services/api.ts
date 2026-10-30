@@ -1,10 +1,23 @@
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
 
+// Pre-signed 30-day dev token for parent.demo@downplus.health for seamless mobile testing
+const DEFAULT_DEV_TOKEN =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MDBmNDcwNS1iMjMxLTQxZDAtODQyYy1hM2E4NmUwY2Y0MzMiLCJlbWFpbCI6InBhcmVudC5kZW1vQGRvd25wbHVzLmhlYWx0aCIsInJvbGUiOiJwYXJlbnQiLCJpYXQiOjE3OTMzOTcwOTcsImV4cCI6MTc5NTk4OTA5N30.SsCSLQjHzM1gvpiDe44o-ThUnBcxMCuNw9YdylSjfI4';
+
 class ApiService {
-  private token: string | null = null;
+  private token: string | null = DEFAULT_DEV_TOKEN;
+  private activeChildId: string = '61871691-0784-4f0f-87de-f407f323a44d';
 
   setToken(token: string | null) {
     this.token = token;
+  }
+
+  getActiveChildId(): string {
+    return this.activeChildId;
+  }
+
+  setActiveChildId(id: string) {
+    this.activeChildId = id;
   }
 
   private async request<T>(
