@@ -23,6 +23,91 @@ interface Milestone {
   tips: string;
 }
 
+interface MakatonSign {
+  id: string;
+  nameAr: string;
+  nameEn: string;
+  emoji: string;
+  gestureDescription: string;
+  soundPrompt: string;
+  parentTip: string;
+}
+
+const MAKATON_SIGNS: MakatonSign[] = [
+  {
+    id: 'm-water',
+    nameAr: 'ماء / عصير',
+    nameEn: 'Water / Drink',
+    emoji: '💧',
+    gestureDescription: 'ضم الأصابع كأنك تمسك كوباً ورفعه بالقرب من الشفاه مع إمالة خفيفة.',
+    soundPrompt: 'قول كلمة "ماااا" بنبرة واضحة وممتدة مع الإشارة.',
+    parentTip: 'استخدم الإشارة دائماً قبل تقديم الماء للطفل وانتظر ثوانٍ ليعيدها.',
+  },
+  {
+    id: 'm-eat',
+    nameAr: 'أكل / طعام',
+    nameEn: 'Eat / Food',
+    emoji: '🥣',
+    gestureDescription: 'تقريب أطراف أصابع اليد الواحدة إلى الفم مرتين متتاليتين.',
+    soundPrompt: 'تكرار صوت "مممم" أو "هممم" بصوت مشجع.',
+    parentTip: 'تساعد الإشارة في تقليل نوبات الغضب الناتجة عن الجوع غير المعبر عنه.',
+  },
+  {
+    id: 'm-more',
+    nameAr: 'المزيد / كمان',
+    nameEn: 'More',
+    emoji: '➕',
+    gestureDescription: 'ضم أطراف أصابع اليدين معاً وضرب أطرافهما ببعض في المنتصف.',
+    soundPrompt: 'نطق كلمة "كـ-مااان" مع فتح العينين بدهشة.',
+    parentTip: 'إشارة سحرية لطلب استمرار اللعبة المفضلة أو المزيد من البسكويت.',
+  },
+  {
+    id: 'm-help',
+    nameAr: 'مساعدة / ساعدني',
+    nameEn: 'Help',
+    emoji: '🤲',
+    gestureDescription: 'وضع اليد اليمنى بقبضة مغلقة فوق راحة اليد اليسرى المفتوحة ورفعهما معاً قليلاً.',
+    soundPrompt: 'قول كلمة "ساعدني" أو "أساعدك؟".',
+    parentTip: 'تمنع الإحباط عند مواجهة صعوبة في فتح علبة الألعاب أو ارتداء الحذاء.',
+  },
+  {
+    id: 'm-sleep',
+    nameAr: 'نوم / نعسان',
+    nameEn: 'Sleep / Bedtime',
+    emoji: '🛏️',
+    gestureDescription: 'ضم كفي اليدين معاً ووضعهما على جانب الخد مع إمالة الرأس بلطف.',
+    soundPrompt: 'همس هادئ "يلا ناااام".',
+    parentTip: 'كررها في روتين ما قبل النوم اليومي لتهدئة الجهاز العصبي.',
+  },
+  {
+    id: 'm-play',
+    nameAr: 'لعب / لعبة',
+    nameEn: 'Play',
+    emoji: '🧸',
+    gestureDescription: 'تحريك الكفين المفتوحين بحركة دائرية مرحة أمام الصدر.',
+    soundPrompt: 'نبرة حماسية: "نلعب؟ كورة!".',
+    parentTip: 'تخلق دافعاً فورياً للتواصل البصري والتفاعل التشاركي.',
+  },
+  {
+    id: 'm-stop',
+    nameAr: 'توقف / خلاص / بس',
+    nameEn: 'Stop / Finished',
+    emoji: '🛑',
+    gestureDescription: 'مد اليد المفتوحة للأمام مع بسط الأصابع أو نفض اليدين للخارج.',
+    soundPrompt: 'حزم لطيف: "خلاااص، بس".',
+    parentTip: 'تعطي الطفل سلطة التعبير عن الرفض بأمان دون صراخ.',
+  },
+  {
+    id: 'm-bye',
+    nameAr: 'باي / مع السلامة',
+    nameEn: 'Goodbye / Wave',
+    emoji: '👋',
+    gestureDescription: 'رفع اليد وفتح الأصابع وغلقها أو التلويح يميناً ويساراً.',
+    soundPrompt: 'نغمة محببة: "بااااي".',
+    parentTip: 'أسهل إشارة اجتماعية لبناء الثقة والتفاعل مع الأقارب والضيوف.',
+  },
+];
+
 const INITIAL_SKILLS: Milestone[] = [
   {
     id: '85ff9210-2253-45cf-8d9a-23b413a7cec8',
@@ -120,6 +205,7 @@ export default function MilestonesScreen() {
   const [skills, setSkills] = useState<Milestone[]>(INITIAL_SKILLS);
   const [activeFilter, setActiveFilter] = useState('all');
   const [celebrateModal, setCelebrateModal] = useState<Milestone | null>(null);
+  const [makatonModalVisible, setMakatonModalVisible] = useState(false);
   const [syncingId, setSyncingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -258,6 +344,26 @@ export default function MilestonesScreen() {
           ))}
         </ScrollView>
 
+        {/* ── 2.5 Makaton Functional Sign Language Banner ── */}
+        <TouchableOpacity
+          style={styles.makatonBanner}
+          onPress={() => setMakatonModalVisible(true)}
+          activeOpacity={0.85}
+        >
+          <View style={styles.makatonBannerLeft}>
+            <View style={styles.makatonIconBox}>
+              <Text style={{ fontSize: 20 }}>🗣️</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.makatonBannerTitle}>دليل إشارات ماكاتون الوظيفية (Makaton)</Text>
+              <Text style={styles.makatonBannerSub}>
+                8 إشارات بصرية مبكرة لتعزيز النطق وتقليل نوبات الغضب
+              </Text>
+            </View>
+          </View>
+          <Text style={styles.makatonBannerArrow}>استعراض ❯</Text>
+        </TouchableOpacity>
+
         {/* ── 3. Milestone Ladder Cards ── */}
         <View style={styles.skillsList}>
           {filteredSkills.map((skill) => (
@@ -324,6 +430,61 @@ export default function MilestonesScreen() {
               onPress={() => setCelebrateModal(null)}
             >
               <Text style={styles.celebrateBtnText}>متابعة التقدم والتأهيل 🚀</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── Makaton Functional Sign Language Modal ── */}
+      <Modal visible={makatonModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.makatonModalCard}>
+            <View style={styles.makatonHeaderRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.makatonModalTitle}>قاموس إشارات ماكاتون الوظيفية 🗣️</Text>
+                <Text style={styles.makatonModalSub}>
+                  لغة التواصل البصري المعززة للنطق المبكر لمتلازمة داون
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setMakatonModalVisible(false)}
+                style={styles.makatonCloseBtn}
+              >
+                <Text style={styles.makatonCloseText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 460 }}>
+              {MAKATON_SIGNS.map((item) => (
+                <View key={item.id} style={styles.makatonCard}>
+                  <View style={styles.makatonCardTop}>
+                    <Text style={{ fontSize: 28 }}>{item.emoji}</Text>
+                    <View style={{ flex: 1, marginRight: 10 }}>
+                      <Text style={styles.makatonCardTitle}>{item.nameAr}</Text>
+                      <Text style={styles.makatonCardEn}>{item.nameEn}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.makatonStepBox}>
+                    <Text style={styles.makatonStepLabel}>طريقة الحركة:</Text>
+                    <Text style={styles.makatonStepText}>{item.gestureDescription}</Text>
+                  </View>
+
+                  <View style={styles.makatonSoundBox}>
+                    <Text style={styles.makatonSoundLabel}>الصوت المنطوق المتزامن:</Text>
+                    <Text style={styles.makatonSoundText}>{item.soundPrompt}</Text>
+                  </View>
+
+                  <Text style={styles.makatonTipText}>💡 {item.parentTip}</Text>
+                </View>
+              ))}
+            </ScrollView>
+
+            <TouchableOpacity
+              style={styles.makatonDoneBtn}
+              onPress={() => setMakatonModalVisible(false)}
+            >
+              <Text style={styles.makatonDoneBtnText}>إغلاق القاموس</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -596,5 +757,169 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '800',
     fontSize: 14,
+  },
+
+  // ── Makaton Styles ──
+  makatonBanner: {
+    backgroundColor: '#EFF6FF',
+    borderColor: '#BFDBFE',
+    borderWidth: 1.5,
+    borderRadius: 20,
+    padding: 14,
+    marginHorizontal: 20,
+    marginBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  makatonBannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  makatonIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: '#DBEAFE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  makatonBannerTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#1E40AF',
+  },
+  makatonBannerSub: {
+    fontSize: 11,
+    color: '#3B82F6',
+    marginTop: 2,
+  },
+  makatonBannerArrow: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#2563EB',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+    marginLeft: 8,
+  },
+
+  // Makaton Modal
+  makatonModalCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    padding: 20,
+    width: '100%',
+    maxHeight: '85%',
+  },
+  makatonHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+    paddingBottom: 12,
+  },
+  makatonModalTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+  },
+  makatonModalSub: {
+    fontSize: 12,
+    color: Colors.textTertiary,
+    marginTop: 2,
+  },
+  makatonCloseBtn: {
+    padding: 6,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 999,
+  },
+  makatonCloseText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  makatonCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 18,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    gap: 8,
+  },
+  makatonCardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  makatonCardTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  makatonCardEn: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  makatonStepBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  makatonStepLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#2563EB',
+    marginBottom: 2,
+  },
+  makatonStepText: {
+    fontSize: 12,
+    color: '#334155',
+    lineHeight: 18,
+  },
+  makatonSoundBox: {
+    backgroundColor: '#ECFDF5',
+    borderRadius: 10,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  makatonSoundLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#065F46',
+    marginBottom: 2,
+  },
+  makatonSoundText: {
+    fontSize: 12,
+    color: '#047857',
+    fontWeight: '700',
+  },
+  makatonTipText: {
+    fontSize: 11,
+    color: '#64748B',
+    fontStyle: 'italic',
+  },
+  makatonDoneBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  makatonDoneBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 13,
   },
 });
