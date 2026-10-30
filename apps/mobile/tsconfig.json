@@ -3,10 +3,19 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": ["./*"],
-      "@downplus/shared-types": ["../../packages/shared-types/src"],
-      "@downplus/validation": ["../../packages/validation/src"]
+      "@/*": [
+        "./*"
+      ],
+      "@downplus/shared-types": [
+        "../../packages/shared-types/src"
+      ],
+      "@downplus/validation": [
+        "../../packages/validation/src"
+      ]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ]
 }
