@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-export default function GuestViewPage() {
+function GuestViewContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token') || 'exp_demo_token';
 
@@ -110,5 +110,13 @@ export default function GuestViewPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function GuestViewPage() {
+  return (
+    <Suspense fallback={<div style={{ textAlign: 'center', padding: '50px' }}>جاري تحميل السجل السريري...</div>}>
+      <GuestViewContent />
+    </Suspense>
   );
 }
