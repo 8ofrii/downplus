@@ -24,6 +24,16 @@ export default function HomePage() {
           </div>
         </Link>
 
+        <Link href="/passport/61871691-0784-4f0f-87de-f407f323a44d" style={{ textDecoration: 'none' }}>
+          <div style={{ backgroundColor: '#FFFFFF', padding: 28, borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #E2E8F0', cursor: 'pointer' }}>
+            <div style={{ fontSize: 32, marginBottom: 14 }}>🛂</div>
+            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1E293B', marginBottom: 8 }}>وثيقة جواز الحياة السريرية (A4)</h3>
+            <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.6 }}>
+              وثيقة طبية رسمية موحدة للطوارئ والمستشفيات تتضمن الفحوصات وتاريخ VSD وجاهزة للطباعة.
+            </p>
+          </div>
+        </Link>
+
         <Link href="/guest/view?token=exp_demo_sample_token" style={{ textDecoration: 'none' }}>
           <div style={{ backgroundColor: '#FFFFFF', padding: 28, borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #E2E8F0', cursor: 'pointer' }}>
             <div style={{ fontSize: 32, marginBottom: 14 }}>🔒</div>

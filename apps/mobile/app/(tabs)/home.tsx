@@ -9,6 +9,7 @@ import {
   TextInput,
   ActivityIndicator,
   Platform,
+  Linking,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Colors, Shadows } from '../../constants/theme';
@@ -326,6 +327,16 @@ export default function HomeScreen() {
               <Text style={styles.qrTokenText}>رمز الطوارئ الطبي الموحد: DP-9488-EG</Text>
               <Text style={styles.qrDesc}>صالح لمسح طواقم الإسعاف والأطباء في المستشفى</Text>
             </View>
+
+            <TouchableOpacity
+              style={styles.emergencyPassportBtn}
+              onPress={() => {
+                const url = 'http://192.168.1.13:3001/passport/61871691-0784-4f0f-87de-f407f323a44d';
+                Linking.openURL(url).catch(() => {});
+              }}
+            >
+              <Text style={styles.emergencyPassportBtnText}>🖨️ فتح وثيقة جواز الحياة المعتمدة (A4 PDF)</Text>
+            </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.emergencyCloseBtn}
@@ -955,6 +966,19 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Colors.textTertiary,
     textAlign: 'center',
+  },
+  emergencyPassportBtn: {
+    backgroundColor: '#ECFDF5',
+    borderColor: '#A7F3D0',
+    borderWidth: 1.5,
+    borderRadius: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  emergencyPassportBtnText: {
+    color: '#065F46',
+    fontWeight: '800',
+    fontSize: 13,
   },
   emergencyCloseBtn: {
     backgroundColor: Colors.emergencyText,
