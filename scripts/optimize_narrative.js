@@ -35,110 +35,225 @@ let styles = content.substring(styleStart, styleEnd);
 
 // Polish the phones container CSS
 const polishedCss = `
-  /* Interactive Scrollable Smartphone Mockups */
+  /* Ultra-Catchy Flagship Smartphone Mockups (iPhone 16 Pro Titanium Style) */
+  .phones-showcase-wrapper {
+    width: 100%;
+    margin-top: 8px;
+  }
   .phones-container {
     display: flex;
     justify-content: center;
-    gap: 16px;
-    margin-top: 8px;
-    height: 525px;
+    gap: 18px;
+    height: 545px;
     width: 100%;
     overflow-x: auto;
-    padding-bottom: 8px;
+    padding: 6px 10px 14px;
+    scroll-behavior: smooth;
   }
   .phone-mockup {
     position: relative;
-    width: 260px;
-    height: 510px;
-    background: #0f172a;
-    border-radius: 38px;
-    padding: 9px;
-    box-shadow: 0 20px 35px -10px rgba(15, 23, 42, 0.35), 0 0 0 2px #334155, 0 0 0 4px #0f172a;
+    width: 272px;
+    height: 525px;
+    background: linear-gradient(145deg, #1e293b, #090d16);
+    border-radius: 46px;
+    padding: 10px;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.25);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     flex-shrink: 0;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .phone-mockup:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 25px 45px -10px rgba(8, 145, 178, 0.3), 0 0 0 2px var(--primary-light), 0 0 0 4px #0f172a;
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: 0 35px 65px -15px rgba(8, 145, 178, 0.35), 0 0 0 2px var(--primary-light), inset 0 1px 2px rgba(255, 255, 255, 0.4);
   }
+  
+  /* Physical Side Buttons */
+  .phone-mockup::before {
+    content: '';
+    position: absolute;
+    left: -2px;
+    top: 90px;
+    width: 3px;
+    height: 28px;
+    background: #475569;
+    border-radius: 3px 0 0 3px;
+    box-shadow: 0 42px 0 #475569, 0 84px 0 #475569;
+  }
+  .phone-mockup::after {
+    content: '';
+    position: absolute;
+    right: -2px;
+    top: 110px;
+    width: 3px;
+    height: 48px;
+    background: #475569;
+    border-radius: 0 3px 3px 0;
+  }
+
+  /* Dynamic Island */
   .phone-notch {
     position: absolute;
-    top: 12px;
+    top: 13px;
     left: 50%;
     transform: translateX(-50%);
-    width: 82px;
-    height: 18px;
-    background: #000;
+    width: 88px;
+    height: 22px;
+    background: #000000;
     border-radius: 20px;
-    z-index: 30;
+    z-index: 35;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 5px;
+    justify-content: space-between;
+    padding: 0 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
   }
-  .phone-notch .cam {
-    width: 7px;
-    height: 7px;
-    background: #1e293b;
+  .phone-notch .cam-lens {
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle at 35% 35%, #2a3447, #0b0f19);
     border-radius: 50%;
+    border: 1px solid #1e293b;
+    box-shadow: inset 0 0 2px #38bdf8;
   }
+  .phone-notch .sensor-dot {
+    width: 4px;
+    height: 4px;
+    background: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 4px #10b981;
+  }
+
+  /* Screen Surface */
   .phone-screen {
     flex: 1;
     background: #f8fafc;
-    border-radius: 30px;
+    border-radius: 36px;
     overflow-y: auto;
     overflow-x: hidden;
     position: relative;
     scroll-behavior: smooth;
     scrollbar-width: thin;
-    scrollbar-color: var(--primary) transparent;
+    scrollbar-color: rgba(8, 145, 178, 0.4) transparent;
+    display: flex;
+    flex-direction: column;
   }
   .phone-screen::-webkit-scrollbar {
-    width: 4px;
+    width: 3.5px;
   }
   .phone-screen::-webkit-scrollbar-thumb {
-    background: var(--primary-light);
-    border-radius: 4px;
+    background: rgba(8, 145, 178, 0.4);
+    border-radius: 10px;
   }
+
+  /* Status Bar */
   .phone-status-bar {
     position: sticky;
     top: 0;
     left: 0;
     right: 0;
-    height: 34px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(8px);
+    height: 38px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    padding: 0 14px 4px;
-    font-size: 9.5px;
-    font-weight: 700;
-    color: var(--gray-800);
-    z-index: 20;
-    border-bottom: 1px solid var(--gray-200);
+    padding: 0 16px 5px;
+    font-size: 10px;
+    font-weight: 800;
+    color: #0f172a;
+    z-index: 25;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
   }
+  .phone-status-bar .status-icons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Scroll Badge */
   .phone-scroll-pill {
     position: absolute;
-    bottom: 8px;
+    bottom: 14px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(15, 23, 42, 0.85);
-    color: #fff;
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(6px);
+    color: #ffffff;
     font-size: 8.5px;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 10px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 12px;
     pointer-events: none;
-    z-index: 25;
-    letter-spacing: 0.04em;
+    z-index: 30;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     display: flex;
     align-items: center;
     gap: 4px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  /* Bottom Floating Dock Bar */
+  .phone-tab-bar {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(226, 232, 240, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 6px 2px;
+    z-index: 20;
+    margin-top: auto;
+  }
+  .phone-tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    font-size: 8px;
+    font-weight: 700;
+    color: #64748b;
+  }
+  .phone-tab-item.active {
+    color: var(--primary-dark);
+  }
+  .phone-tab-item .tab-icon {
+    font-size: 14px;
+    line-height: 1;
+  }
+  .phone-home-indicator {
+    width: 90px;
+    height: 3.5px;
+    background: #0f172a;
+    border-radius: 4px;
+    opacity: 0.35;
+    margin: 3px auto 1px;
+  }
+
+  /* Micro Glass Cards inside Screen */
+  .screen-content {
+    padding: 10px 11px;
+    flex: 1;
+  }
+  .screen-glass-card {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    border-radius: 14px;
+    padding: 10px;
+    margin-bottom: 9px;
+    box-shadow: 0 4px 14px -2px rgba(40, 80, 65, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02);
   }
 
   /* Interactive Scrollable Browser Mockup */
