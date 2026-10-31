@@ -4,7 +4,7 @@ import * as bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting Down Plus database seeding...');
+  console.log('🚀 Starting Down Plus database seeding...');
 
   // 1. Seed Milestone Catalog (AAP Health Supervision for Children with Down Syndrome)
   console.log('Seeding AAP Down Syndrome Milestone Catalog...');
@@ -17,7 +17,7 @@ async function main() {
       ageBracketMaxMonths: 6,
       titleAr: 'التحكم في الرأس وثبات الرقبة أثناء الحمل',
       titleEn: 'Steady Head Control While Supported',
-      descriptionAr: 'يستطيع الرضيع الحفاظ على ثبات رأسه دون ترنح أثناء حمله في وضع رأسي لمدة دقيقة.',
+      descriptionAr: 'يستطيع الرضيع الحفاظ على ثبات رأسه دون انحناء أثناء حمله في وضع رأسي لمدة دقيقة على الأقل.',
       descriptionEn: 'Maintains steady head control without bobbing when held in an upright position for at least 1 minute.',
       isMandatoryClinicalCheck: false,
     },
@@ -69,8 +69,8 @@ async function main() {
       ageBracketMaxMonths: 24,
       titleAr: 'استخدام الإشارات والكلمات المفردة (3-5 كلمات)',
       titleEn: 'Expressive Single Words or Gestures (3-5 words)',
-      descriptionAr: 'يستخدم كلمات وظيفية واضحة أو إشارات لطلب الأشياء الأساسية (ماما، بابا، ماء، باي).',
-      descriptionEn: 'Uses at least 3-5 consistent functional words or signs to request desired items.',
+      descriptionAr: 'يستخدم كلمات وظيفية واضحة أو إشارات ماكاتون لطلب الأشياء الأساسية (ماما، بابا، ماء، باي).',
+      descriptionEn: 'Uses at least 3-5 consistent functional words or Makaton signs to request desired items.',
       isMandatoryClinicalCheck: false,
     },
     {
@@ -89,7 +89,7 @@ async function main() {
       domain: 'cognitive',
       ageBracketMinMonths: 6,
       ageBracketMaxMonths: 18,
-      titleAr: 'مفهوم ثبات الأشياء والبحث عن لعبة مخفية',
+      titleAr: 'مفهوم بقاء الأشياء والبحث عن لعبة مخفية',
       titleEn: 'Object Permanence & Searching for Hidden Toys',
       descriptionAr: 'يبحث بنشاط عن لعبة مغطاة جزئياً أو كلياً تحت قطعة قماش.',
       descriptionEn: 'Actively searches for and uncovers a toy hidden under a small cloth or blanket.',
@@ -113,7 +113,7 @@ async function main() {
       ageBracketMaxMonths: 2,
       titleAr: 'فحص إيكو القلب الشامل لحديثي الولادة (Echocardiogram)',
       titleEn: 'Neonatal Screening Echocardiogram for Congenital Heart Defects',
-      descriptionAr: 'فحص إلزامي بالسونار للقلب للكشف المبكر عن عيوب القناة الأذينية البطينية (AVSD) أو VSD.',
+      descriptionAr: 'فحص تصويري بالموجات فوق الصوتية للقلب للكشف المبكر عن عيوب القناة الأذينية البطينية (AVSD) أو VSD.',
       descriptionEn: 'Mandatory cardiac echocardiography performed by a pediatric cardiologist to screen for AVSD/VSD.',
       isMandatoryClinicalCheck: true,
     },
@@ -143,7 +143,7 @@ async function main() {
       ageBracketMaxMonths: 36,
       titleAr: 'فحص قاع العين وتقييم الاستجماتيزم وضعف الإبصار',
       titleEn: 'Pediatric Ophthalmology Screen for Refractive Errors & Strabismus',
-      descriptionAr: 'فحص عيون متخصص لكشف الاستجماتيزم وعيوب الإبصار أو إعتام عدسة العين الخلقي المبكر.',
+      descriptionAr: 'فحص عيون متخصص لكشف الاستجماتيزم وعيوب الإبصار أو عتامة عدسة العين الخلقي المبكر.',
       descriptionEn: 'Comprehensive eye examination by a pediatric ophthalmologist for strabismus, nystagmus, and cataracts.',
       isMandatoryClinicalCheck: true,
     },
@@ -177,7 +177,7 @@ async function main() {
       phone: '+201011112233',
       fullName: 'د. هاني مصطفى',
       specialty: 'استشاري تأهيل وعلاج طبيعي للأطفال',
-      city: 'Giza',
+      city: 'الجيزة',
       state: 'Giza',
       consultationFee: 400.0,
       expYears: 16,
@@ -189,24 +189,36 @@ async function main() {
       phone: '+201022223344',
       fullName: 'د. نورهان المصري',
       specialty: 'أخصائية تخاطب وتعديل سلوك أطفال',
-      city: 'Cairo',
+      city: 'القاهرة',
       state: 'Cairo',
       consultationFee: 350.0,
       expYears: 11,
       dsScore: 4.88,
-      tags: ['speech_delay', 'swallowing_issues', 'oral_motor', 'apraxia', 'early_intervention'],
+      tags: ['speech_delay', 'swallowing_issues', 'oral_motor', 'apraxia', 'early_intervention', 'makaton'],
     },
     {
       email: 'dr.tarek.khalil@downplus.health',
       phone: '+201033334455',
-      fullName: 'أ.د. طارق خليل',
+      fullName: 'أ.د. عادل خليل',
       specialty: 'استشاري مخ وأعصاب أطفال',
-      city: 'Giza',
+      city: 'الجيزة',
       state: 'Giza',
       consultationFee: 650.0,
       expYears: 24,
       dsScore: 4.98,
       tags: ['neurology', 'hypotonia', 'atlantoaxial_instability', 'epilepsy', 'developmental_delay'],
+    },
+    {
+      email: 'dr.sarah.elmenshawy@downplus.health',
+      phone: '+201044445566',
+      fullName: 'د. سارة المنشاوي',
+      specialty: 'استشاري قلب أطفال - مستشفى أبو الريش',
+      city: 'القاهرة',
+      state: 'Cairo',
+      consultationFee: 500.0,
+      expYears: 18,
+      dsScore: 4.99,
+      tags: ['pediatric_cardiology', 'congenital_heart_defects', 'vsd_followup', 'echocardiogram'],
     },
   ];
 
@@ -270,46 +282,48 @@ async function main() {
       data: {
         parentId: demoParent.id,
         firstName: 'عمر',
-        lastName: 'أحمد',
+        lastName: 'أحمد محمود',
         dateOfBirth: new Date('2024-03-15'),
         gender: 'male',
-        bloodType: 'A+',
+        bloodType: 'O+',
         clinicalProfile: {
           create: {
             primaryDiagnosis: 'Down Syndrome',
             karyotypeType: 'Trisomy 21',
             gestationalAgeWeeks: 38,
             birthWeightKg: 3.1,
-            comorbidities: ['Congenital Heart Defect (Repaired VSD)', 'Hypothyroidism'],
+            comorbidities: ['Congenital Heart Defect (Repaired VSD at Abu El-Reesh)', 'Controlled Hypothyroidism'],
           },
         },
         caseBaseline: {
           create: {
-            status: 'draft_pending_doctor',
+            status: 'confirmed_by_doctor',
             aiGeneratedSummary: {
-              extracted_conditions: ['Trisomy 21', 'Hypothyroidism', 'Repaired VSD'],
+              extracted_conditions: ['Trisomy 21 (Free Standard)', 'Controlled Hypothyroidism', 'Repaired VSD'],
               current_medications: [
                 {
                   drug: 'Eltroxin',
                   dosage: '25 mcg',
-                  frequency: 'Once daily before feeding',
+                  frequency: 'Once daily morning fasting',
                 },
               ],
               identified_strengths: [
-                'High social engagement and joyful temperament',
-                'Visual tracking and social smiling well-established',
+                'High social engagement, eye contact, and cheerful temperament',
+                'Visual imitation and gesture responsiveness well-established',
               ],
               priority_clinical_needs: [
-                'Thyroid panel (TSH/FT4) repeat due in 3 weeks',
+                'Routine annual thyroid panel (TSH/FT4)',
                 'Physical therapy for trunk hypotonia and ankle stability (SMOs)',
-                'Audiology follow-up at 18 months',
+                'Makaton functional gesture training for early speech initiation',
               ],
               growth_metrics: {
-                weight_kg: 11.2,
-                height_cm: 82.5,
+                weight_kg: 12.4,
+                height_cm: 84.2,
+                head_circumference_cm: 47.1,
+                growth_percentile_curves: 'Zemel et al. AAP Pediatrics 2015',
               },
             },
-            doctorNotes: 'Pending clinic review with Dr. Hany Mostafa.',
+            doctorNotes: 'تمت مراجعة خط الأساس الطبي واعتماده رسمياً. فحص الإيكو ووظائف الغدة طبيعية ومستقرة.',
           },
         },
       },
@@ -318,7 +332,7 @@ async function main() {
     console.log(`Created demo child: ${demoChild.firstName} (${demoChild.id})`);
   }
 
-  console.log('✅ Down Plus Database Seeding Completed Successfully!');
+  console.log('✓ Down Plus Database Seeding Completed Successfully!');
 }
 
 main()
