@@ -18,6 +18,7 @@ import { api } from '../../services/api';
 export default function HomeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [emergencyModalVisible, setEmergencyModalVisible] = useState(false);
+  const [aapModalVisible, setAapModalVisible] = useState(false);
   const [noteType, setNoteType] = useState('general_observation');
   const [noteContent, setNoteContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -128,14 +129,24 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <TouchableOpacity
-            style={styles.bookBtn}
-            activeOpacity={0.9}
-            onPress={() => router.push('/(tabs)/chat')}
-          >
-            <Text style={styles.bookBtnText}>حجز لدى شبكة معتمدة • استشارة فورية</Text>
-            <Text style={styles.bookBtnArrow}>←</Text>
-          </TouchableOpacity>
+          <View style={styles.urgentBtnRow}>
+            <TouchableOpacity
+              style={styles.bookBtn}
+              activeOpacity={0.9}
+              onPress={() => router.push('/(tabs)/chat')}
+            >
+              <Text style={styles.bookBtnText}>حجز موعد مع استشاري</Text>
+              <Text style={styles.bookBtnArrow}>←</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.aapDetailsBtn}
+              activeOpacity={0.9}
+              onPress={() => setAapModalVisible(true)}
+            >
+              <Text style={styles.aapDetailsBtnText}>جدول الفحوصات 📋</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* ── 3. Weekly Skill Goal Card (Independence Ladder) ── */}
@@ -328,6 +339,40 @@ export default function HomeScreen() {
               <Text style={styles.qrDesc}>صالح لمسح طواقم الإسعاف والأطباء في المستشفى</Text>
             </View>
 
+            {/* Emergency 1-Tap Speed Dial Action Row */}
+            <View style={styles.emergencyDialRow}>
+              <TouchableOpacity
+                style={styles.dialBtnAmbulance}
+                onPress={() => Linking.openURL('tel:123')}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.dialBtnIcon}>🚑</Text>
+                <Text style={styles.dialBtnText}>الإسعاف (123)</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.dialBtnHotline}
+                onPress={() => Linking.openURL('tel:16000')}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.dialBtnIcon}>📞</Text>
+                <Text style={styles.dialBtnText}>نجدة الطفل (16000)</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.dialBtnWhatsapp}
+                onPress={() =>
+                  Linking.openURL(
+                    'https://wa.me/201011112233?text=%D8%AD%D8%A7%D9%84%D8%A9%20%D8%B7%D9%88%D8%A7%D8%B1%D8%A6%20%D9%84%D9%84%D8%B7%D9%81%D9%84%20%D8%B9%D9%85%D8%B1%20%D8%A3%D8%AD%D9%85%D8%AF',
+                  )
+                }
+                activeOpacity={0.8}
+              >
+                <Text style={styles.dialBtnIcon}>💬</Text>
+                <Text style={styles.dialBtnText}>طبيب الطوارئ</Text>
+              </TouchableOpacity>
+            </View>
+
             <TouchableOpacity
               style={styles.emergencyPassportBtn}
               onPress={() => {
@@ -344,6 +389,114 @@ export default function HomeScreen() {
             >
               <Text style={styles.emergencyCloseBtnText}>إغلاق بطاقة الطوارئ</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── AAP Clinical Health Supervision Schedule Modal ── */}
+      <Modal visible={aapModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.aapModalCard}>
+            <View style={styles.aapModalHeader}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.aapModalTitle}>جدول المتابعة السريرية الدورية 🩺</Text>
+                <Text style={styles.aapModalSub}>
+                  توصيات الأكاديمية الأمريكية لطب الأطفال (AAP Guidelines) لعمر (31 شهراً)
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setAapModalVisible(false)}
+                style={styles.aapCloseBtn}
+              >
+                <Text style={styles.aapCloseText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 440 }}>
+              {[
+                {
+                  age: 'حديثي الولادة (0 - 2 شهر)',
+                  title: 'فحص إيكو القلب الشامل (Echocardiogram)',
+                  status: 'completed',
+                  statusLabel: 'مكتمل وطبيعي ✅',
+                  desc: 'تم التئام ثقب VSD والوظيفة الانقباضية للقلب مستقرة بنسبة 64%.',
+                },
+                {
+                  age: '6 - 12 شهراً',
+                  title: 'تحليل وظائف الغدة الدرقية السنوي (TSH & FT4)',
+                  status: 'completed',
+                  statusLabel: 'مكتمل ومستقر ✅',
+                  desc: 'مستقر تحت علاج إيلتروكسين 25 ميكروجرام بانتظام.',
+                },
+                {
+                  age: '12 - 18 شهراً',
+                  title: 'فحص السمع وتخطيط طبلة الأذن (Audiology)',
+                  status: 'completed',
+                  statusLabel: 'مكتمل ✅',
+                  desc: 'استجابة سمعية سليمة بالجهتين ولا يوجد ارتشاح خلف الطبلة.',
+                },
+                {
+                  age: '24 - 36 شهراً (السنوي)',
+                  title: 'تحليل الغدة الدرقية الدوري + فحص قاع العين',
+                  status: 'urgent',
+                  statusLabel: 'مستحق الآن ⚠️',
+                  desc: 'مستحق في عمر 30-36 شهراً للكشف المبكر عن أي تراجع في الإبصار أو الحاجة لتعديل جرعة الدواء.',
+                },
+                {
+                  age: '36 - 48 شهراً (3 سنوات)',
+                  title: 'أشعة الفقرات العنقية الجانبية (Cervical Spine X-Ray)',
+                  status: 'upcoming',
+                  statusLabel: 'مجدول قادماً ⏳',
+                  desc: 'فحص أمان الحبل الشوكي لكشف عدم استقرار المفصل الفهقي المحوري (AAI) قبل الأنشطة الرياضية.',
+                },
+              ].map((item, idx) => (
+                <View
+                  key={idx}
+                  style={[
+                    styles.aapScheduleCard,
+                    item.status === 'urgent' && styles.aapScheduleCardUrgent,
+                  ]}
+                >
+                  <View style={styles.aapScheduleTop}>
+                    <Text style={styles.aapAgeBadge}>{item.age}</Text>
+                    <View
+                      style={[
+                        styles.aapStatusBadge,
+                        item.status === 'urgent' && styles.aapStatusUrgent,
+                        item.status === 'completed' && styles.aapStatusCompleted,
+                        item.status === 'upcoming' && styles.aapStatusUpcoming,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.aapStatusText,
+                          item.status === 'urgent' && styles.aapStatusTextUrgent,
+                          item.status === 'completed' && styles.aapStatusTextCompleted,
+                          item.status === 'upcoming' && styles.aapStatusTextUpcoming,
+                        ]}
+                      >
+                        {item.statusLabel}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Text style={styles.aapCardTitle}>{item.title}</Text>
+                  <Text style={styles.aapCardDesc}>{item.desc}</Text>
+                </View>
+              ))}
+            </ScrollView>
+
+            <View style={styles.aapActionRow}>
+              <TouchableOpacity
+                style={styles.aapBookActionBtn}
+                onPress={() => {
+                  setAapModalVisible(false);
+                  router.push('/(tabs)/chat');
+                }}
+              >
+                <Text style={styles.aapBookActionText}>حجز الفحص المستحق الآن 🩺</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -990,5 +1143,187 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '800',
     fontSize: 13,
+  },
+
+  // Urgent Card Actions
+  urgentBtnRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 6,
+  },
+  aapDetailsBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#FDE68A',
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  aapDetailsBtnText: {
+    color: '#B45309',
+    fontWeight: '800',
+    fontSize: 12,
+  },
+
+  // Emergency Speed Dial Row
+  emergencyDialRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginVertical: 4,
+  },
+  dialBtnAmbulance: {
+    flex: 1,
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingVertical: 10,
+    alignItems: 'center',
+    gap: 2,
+  },
+  dialBtnHotline: {
+    flex: 1,
+    backgroundColor: '#EFF6FF',
+    borderColor: '#BFDBFE',
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingVertical: 10,
+    alignItems: 'center',
+    gap: 2,
+  },
+  dialBtnWhatsapp: {
+    flex: 1,
+    backgroundColor: '#ECFDF5',
+    borderColor: '#A7F3D0',
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingVertical: 10,
+    alignItems: 'center',
+    gap: 2,
+  },
+  dialBtnIcon: {
+    fontSize: 18,
+  },
+  dialBtnText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+  },
+
+  // AAP Health Supervision Modal Styles
+  aapModalCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    padding: 20,
+    width: '100%',
+    maxHeight: '85%',
+  },
+  aapModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+    paddingBottom: 12,
+  },
+  aapModalTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+  },
+  aapModalSub: {
+    fontSize: 11,
+    color: Colors.textTertiary,
+    marginTop: 2,
+    lineHeight: 16,
+  },
+  aapCloseBtn: {
+    padding: 6,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 999,
+  },
+  aapCloseText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  aapScheduleCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    gap: 6,
+  },
+  aapScheduleCardUrgent: {
+    backgroundColor: '#FFFBEB',
+    borderColor: '#FDE68A',
+    borderWidth: 1.5,
+  },
+  aapScheduleTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  aapAgeBadge: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: Colors.textTertiary,
+  },
+  aapStatusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  aapStatusUrgent: {
+    backgroundColor: '#FEF3C7',
+  },
+  aapStatusCompleted: {
+    backgroundColor: '#DCFCE7',
+  },
+  aapStatusUpcoming: {
+    backgroundColor: '#F1F5F9',
+  },
+  aapStatusText: {
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  aapStatusTextUrgent: {
+    color: '#B45309',
+  },
+  aapStatusTextCompleted: {
+    color: '#15803D',
+  },
+  aapStatusTextUpcoming: {
+    color: '#64748B',
+  },
+  aapCardTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  aapCardDesc: {
+    fontSize: 12,
+    color: '#475569',
+    lineHeight: 18,
+  },
+  aapActionRow: {
+    marginTop: 12,
+  },
+  aapBookActionBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+    ...Shadows.glowPrimary,
+  },
+  aapBookActionText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 14,
   },
 });
