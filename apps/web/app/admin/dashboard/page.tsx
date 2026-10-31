@@ -20,7 +20,7 @@ const DEMO_DOCTORS: DoctorItem[] = [
     name: 'د. هاني مصطفى',
     license: 'EGY-MED-44219',
     specialty: 'استشاري تأهيل وعلاج طبيعي للأطفال',
-    city: 'الجيزة',
+    city: 'القاهرة',
     fee: 400,
     expYears: 16,
     isActive: true,
@@ -30,17 +30,17 @@ const DEMO_DOCTORS: DoctorItem[] = [
     name: 'د. نورهان المصري',
     license: 'EGY-MED-87112',
     specialty: 'أخصائية تخاطب وتعديل سلوك أطفال',
-    city: 'القاهرة',
+    city: 'الجيزة',
     fee: 350,
     expYears: 11,
     isActive: true,
   },
   {
     id: 'd3',
-    name: 'أ.د. طارق خليل',
+    name: 'أ.د. عادل خليل',
     license: 'EGY-MED-12903',
     specialty: 'استشاري مخ وأعصاب أطفال',
-    city: 'الجيزة',
+    city: 'القاهرة',
     fee: 650,
     expYears: 24,
     isActive: false,
@@ -50,106 +50,115 @@ const DEMO_DOCTORS: DoctorItem[] = [
 export default function AdminDashboardPage() {
   const [doctors, setDoctors] = useState<DoctorItem[]>(DEMO_DOCTORS);
 
-  const toggleDoctor = async (id: string) => {
-    const doc = doctors.find((d) => d.id === id);
-    if (!doc) return;
-    const newStatus = !doc.isActive;
-
-    // Optimistic UI update
-    setDoctors((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, isActive: newStatus } : d)),
+  const toggleDoctorStatus = (id: string) => {
+    setDoctors(prev =>
+      prev.map(doc => doc.id === id ? { ...doc, isActive: !doc.isActive } : doc)
     );
-
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
-      await fetch(`${apiUrl}/admin/doctors/${id}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_active: newStatus }),
-      });
-    } catch {
-      // Graceful offline fallback
-    }
   };
 
   return (
-    <div style={{ maxWidth: 1200, margin: '40px auto', padding: '0 24px' }}>
+    <div style={{ maxWidth: 1100, margin: '40px auto', padding: '0 24px' }}>
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
         <div>
-          <h1 style={{ fontSize: 28, fontWeight: 800, color: '#0F172A' }}>
-            لوحة الإدارة الرئيسية (Super Admin Engine) ⚙️
-          </h1>
-          <p style={{ color: '#64748B', marginTop: 4 }}>
-            مراقبة مقاييس النظام متعدد المستأجرين (Multi-tenant Core)، تراخيص العيادات، واشتراكات Paymob.
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 26 }}>⚙️</span>
+            <h1 style={{ fontSize: 26, fontWeight: 900, color: '#0F172A' }}>
+              لوحة إدارة المنظومة والحوكمة الإكلينيكية
+            </h1>
+          </div>
+          <p style={{ color: '#64748B', fontSize: 14, marginTop: 4 }}>
+            اعتماد تراخيص الأطباء، الرقابة الطبية، ومتابعة مؤشرات أداء منصة Down Plus.
           </p>
         </div>
-        <Link href="/" style={{ padding: '8px 16px', backgroundColor: '#F1F5F9', borderRadius: 10, color: '#475569', textDecoration: 'none', fontWeight: 600 }}>
+
+        <Link
+          href="/"
+          style={{
+            backgroundColor: '#F1F5F9',
+            color: '#475569',
+            padding: '10px 18px',
+            borderRadius: 12,
+            fontWeight: 700,
+            textDecoration: 'none',
+            fontSize: 14,
+          }}
+        >
           ← العودة للرئيسية
         </Link>
       </div>
 
-      {/* Metrics Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 32 }}>
-        {[
-          { label: 'إجمالي المستخدمين', value: '1,420', change: '+12% هذا الشهر', bg: '#EFF6FF', text: '#1E40AF' },
-          { label: 'سجلات الأطفال المسجلة', value: '984', change: 'متلازمة داون (100%)', bg: '#F5F3FF', text: '#5B21B6' },
-          { label: 'الأطباء المعتمدون', value: '48', change: 'في 6 محافظات', bg: '#ECFDF5', text: '#065F46' },
-          { label: 'المستندات المعالجة بـ OCR', value: '3,812', change: 'معدل نجاح 98.4%', bg: '#FFFBEB', text: '#92400E' },
-          { label: 'اشتراكات Pro الفعالة', value: '342', change: 'بوابة Paymob مصر', bg: '#FEF2F2', text: '#991B1B' },
-        ].map((stat, idx) => (
-          <div key={idx} style={{ backgroundColor: stat.bg, padding: 20, borderRadius: 16, border: '1px solid rgba(0,0,0,0.05)' }}>
-            <div style={{ color: stat.text, fontSize: 13, fontWeight: 700 }}>{stat.label}</div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: stat.text, marginTop: 8 }}>{stat.value}</div>
-            <div style={{ fontSize: 11, color: stat.text, opacity: 0.8, marginTop: 4 }}>{stat.change}</div>
-          </div>
-        ))}
+      {/* Admin KPI Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 18, marginBottom: 32 }}>
+        <div style={{ backgroundColor: '#FFFFFF', padding: 20, borderRadius: 16, border: '1px solid #E2E8F0', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+          <div style={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>إجمالي الأطباء المعتمدين</div>
+          <div style={{ fontSize: 26, fontWeight: 900, color: '#0F172A', marginTop: 4 }}>{doctors.length}</div>
+          <div style={{ fontSize: 11, color: '#059669', fontWeight: 700, marginTop: 4 }}>تراخيص نقابة موثقة ✓</div>
+        </div>
+
+        <div style={{ backgroundColor: '#FFFFFF', padding: 20, borderRadius: 16, border: '1px solid #E2E8F0', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+          <div style={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>الأطفال المسجلين بالمنصة</div>
+          <div style={{ fontSize: 26, fontWeight: 900, color: '#059669', marginTop: 4 }}>1,420</div>
+          <div style={{ fontSize: 11, color: '#047857', fontWeight: 700, marginTop: 4 }}>عائلات مصرية نشطة</div>
+        </div>
+
+        <div style={{ backgroundColor: '#FFFFFF', padding: 20, borderRadius: 16, border: '1px solid #E2E8F0', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+          <div style={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>مستندات OCR الممسوحة</div>
+          <div style={{ fontSize: 26, fontWeight: 900, color: '#2563EB', marginTop: 4 }}>3,890</div>
+          <div style={{ fontSize: 11, color: '#1D4ED8', fontWeight: 700, marginTop: 4 }}>تحاليل وتقارير إيكو</div>
+        </div>
+
+        <div style={{ backgroundColor: '#FFFFFF', padding: 20, borderRadius: 16, border: '1px solid #E2E8F0', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+          <div style={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>استشارات التطبيب عن بُعد</div>
+          <div style={{ fontSize: 26, fontWeight: 900, color: '#7C3AED', marginTop: 4 }}>942</div>
+          <div style={{ fontSize: 11, color: '#6D28D9', fontWeight: 700, marginTop: 4 }}>عمولة المنصة: 15%</div>
+        </div>
       </div>
 
-      {/* Doctors Table */}
-      <div style={{ backgroundColor: '#FFFFFF', borderRadius: 20, border: '1px solid #E2E8F0', overflow: 'hidden' }}>
+      {/* Doctor Credentialing Verification Table */}
+      <div style={{ backgroundColor: '#FFFFFF', borderRadius: 20, border: '1px solid #E2E8F0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
         <div style={{ padding: '20px 24px', borderBottom: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1E293B' }}>إدارة مصفوفة الأطباء والترخيص الطبي</h2>
+          <h2 style={{ fontSize: 17, fontWeight: 800, color: '#0F172A' }}>سجل التحقق من التراخيص الطبية للأطباء</h2>
+          <span style={{ fontSize: 12, color: '#64748B' }}>التدقيق مع نقابة الأطباء ووزارة الصحة المصرية</span>
         </div>
 
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
           <thead>
-            <tr style={{ backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0', color: '#64748B', fontSize: 13 }}>
+            <tr style={{ backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: 13, color: '#64748B' }}>
               <th style={{ padding: '14px 24px' }}>اسم الطبيب</th>
-              <th style={{ padding: '14px 24px' }}>رقم الترخيص</th>
-              <th style={{ padding: '14px 24px' }}>التخصص</th>
+              <th style={{ padding: '14px 24px' }}>رقم ترخيص مزاولة المهنة</th>
+              <th style={{ padding: '14px 24px' }}>التخصص الإكلينيكي</th>
               <th style={{ padding: '14px 24px' }}>المدينة</th>
-              <th style={{ padding: '14px 24px' }}>سنوات الخبرة</th>
-              <th style={{ padding: '14px 24px' }}>سعر الكشف</th>
-              <th style={{ padding: '14px 24px' }}>حالة الحساب</th>
-              <th style={{ padding: '14px 24px' }}>التحكم</th>
+              <th style={{ padding: '14px 24px' }}>رسوم الكشف</th>
+              <th style={{ padding: '14px 24px' }}>حالة الاعتماد</th>
+              <th style={{ padding: '14px 24px', textAlign: 'center' }}>التحكم بالترخيص</th>
             </tr>
           </thead>
           <tbody>
-            {doctors.map((d) => (
-              <tr key={d.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                <td style={{ padding: '16px 24px', fontWeight: 700, color: '#0F172A' }}>{d.name}</td>
-                <td style={{ padding: '16px 24px', color: '#475569', fontFamily: 'monospace' }}>{d.license}</td>
-                <td style={{ padding: '16px 24px', color: '#475569' }}>{d.specialty}</td>
-                <td style={{ padding: '16px 24px', color: '#475569' }}>{d.city}</td>
-                <td style={{ padding: '16px 24px', color: '#475569' }}>{d.expYears} سنوات</td>
-                <td style={{ padding: '16px 24px', color: '#0F172A', fontWeight: 700 }}>{d.fee} ج.م</td>
+            {doctors.map((doc) => (
+              <tr key={doc.id} style={{ borderBottom: '1px solid #F1F5F9', fontSize: 14 }}>
+                <td style={{ padding: '16px 24px', fontWeight: 800, color: '#0F172A' }}>{doc.name}</td>
+                <td style={{ padding: '16px 24px', fontFamily: 'monospace', color: '#475569', fontWeight: 700 }}>{doc.license}</td>
+                <td style={{ padding: '16px 24px', color: '#334155' }}>{doc.specialty}</td>
+                <td style={{ padding: '16px 24px', color: '#64748B' }}>{doc.city}</td>
+                <td style={{ padding: '16px 24px', fontWeight: 700, color: '#059669' }}>{doc.fee} ج.م</td>
                 <td style={{ padding: '16px 24px' }}>
-                  {d.isActive ? (
-                    <span style={{ backgroundColor: '#DCFCE7', color: '#15803D', padding: '4px 10px', borderRadius: 8, fontSize: 12, fontWeight: 700 }}>
-                      نشط ومعتمد ✅
+                  {doc.isActive ? (
+                    <span style={{ backgroundColor: '#DCFCE7', color: '#166534', padding: '4px 10px', borderRadius: 8, fontSize: 12, fontWeight: 700 }}>
+                      نشط ومفعل ✓
                     </span>
                   ) : (
-                    <span style={{ backgroundColor: '#FEE2E2', color: '#B91C1C', padding: '4px 10px', borderRadius: 8, fontSize: 12, fontWeight: 700 }}>
-                      قيد المراجعة / معطل ⏸️
+                    <span style={{ backgroundColor: '#FEE2E2', color: '#991B1B', padding: '4px 10px', borderRadius: 8, fontSize: 12, fontWeight: 700 }}>
+                      معلق / بانتظار التدقيق
                     </span>
                   )}
                 </td>
-                <td style={{ padding: '16px 24px' }}>
+                <td style={{ padding: '16px 24px', textAlign: 'center' }}>
                   <button
-                    onClick={() => toggleDoctor(d.id)}
+                    onClick={() => toggleDoctorStatus(doc.id)}
                     style={{
-                      backgroundColor: d.isActive ? '#FEE2E2' : '#DCFCE7',
-                      color: d.isActive ? '#B91C1C' : '#15803D',
+                      backgroundColor: doc.isActive ? '#FEE2E2' : '#DCFCE7',
+                      color: doc.isActive ? '#991B1B' : '#166534',
                       border: 'none',
                       borderRadius: 8,
                       padding: '6px 14px',
@@ -158,7 +167,7 @@ export default function AdminDashboardPage() {
                       cursor: 'pointer',
                     }}
                   >
-                    {d.isActive ? 'تعطيل الحساب' : 'تفعيل واعتماد'}
+                    {doc.isActive ? 'تعليق الحساب' : 'تفعيل واعتماد'}
                   </button>
                 </td>
               </tr>

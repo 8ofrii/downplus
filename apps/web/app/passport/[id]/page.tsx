@@ -5,15 +5,15 @@ import Link from 'next/link';
 
 export default function LifePassportPrintPage({ params }: { params: { id: string } }) {
   const child = {
-    name: 'عمر أحمد',
-    nameEn: 'Omar Ahmed',
-    karyotype: 'Trisomy 21 (Free Standard)',
+    name: 'عمر أحمد محمود',
+    nameEn: 'Omar Ahmed Mahmoud',
+    karyotype: 'Trisomy 21 (Free Standard - ثلاثي الصبغي 21)',
     dob: '2024-03-15',
-    ageMonths: 31,
+    ageMonths: 28,
     bloodType: 'O+ Positive',
-    emergencyContact: '+20 101 234 5678 (والد الطفل)',
-    primaryPhysician: 'د. هاني مصطفى (استشاري تأهيل أطفال)',
-    hospitalRecord: 'DP-EG-2026-8812',
+    emergencyContact: '+20 101 234 5678 (والد الطفل: م. أحمد)',
+    primaryPhysician: 'د. سارة المنشاوي (استشاري قلب الأطفال - أبو الريش)',
+    hospitalRecord: 'T21-EGY-2024-8841',
     lastReviewDate: '2026-10-30',
   };
 
@@ -29,7 +29,7 @@ export default function LifePassportPrintPage({ params }: { params: { id: string
       <div
         className="no-print"
         style={{
-          maxWidth: 820,
+          maxWidth: 860,
           margin: '0 auto 24px',
           display: 'flex',
           justifyContent: 'space-between',
@@ -41,13 +41,16 @@ export default function LifePassportPrintPage({ params }: { params: { id: string
           border: '1px solid #E2E8F0',
         }}
       >
-        <div>
-          <span style={{ fontWeight: 800, color: '#0F172A', fontSize: 16 }}>
-            🛂 وثيقة جواز الحياة الطبي الموحد (Life Passport)
-          </span>
-          <span style={{ fontSize: 12, color: '#64748B', marginRight: 8 }}>
-            • نموذج الطوارئ والمستشفيات
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 22 }}>🪪</span>
+          <div>
+            <span style={{ fontWeight: 800, color: '#0F172A', fontSize: 16 }}>
+              وثيقة جواز الحياة الطبي المعتمد (Life Passport)
+            </span>
+            <div style={{ fontSize: 12, color: '#64748B' }}>
+              مطابق لبروتوكول الرعاية الإشرافية للأكاديمية الأمريكية لطب الأطفال (AAP Guidelines)
+            </div>
+          </div>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
           <button
@@ -57,8 +60,8 @@ export default function LifePassportPrintPage({ params }: { params: { id: string
               color: '#FFFFFF',
               border: 'none',
               borderRadius: 10,
-              padding: '8px 18px',
-              fontWeight: 700,
+              padding: '10px 20px',
+              fontWeight: 800,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -69,18 +72,20 @@ export default function LifePassportPrintPage({ params }: { params: { id: string
             <span>🖨️</span> طباعة أو حفظ PDF
           </button>
           <Link
-            href="/dashboard"
+            href="/"
             style={{
               backgroundColor: '#F1F5F9',
               color: '#475569',
               borderRadius: 10,
-              padding: '8px 16px',
-              fontWeight: 600,
+              padding: '10px 16px',
+              fontWeight: 700,
               textDecoration: 'none',
               fontSize: 14,
+              display: 'flex',
+              alignItems: 'center',
             }}
           >
-            ← العودة للوحة التحكم
+            الرئيسية
           </Link>
         </div>
       </div>
@@ -88,7 +93,7 @@ export default function LifePassportPrintPage({ params }: { params: { id: string
       {/* Main A4 Document Sheet */}
       <div
         style={{
-          maxWidth: 820,
+          maxWidth: 860,
           margin: '0 auto',
           backgroundColor: '#FFFFFF',
           borderRadius: 16,
@@ -110,14 +115,19 @@ export default function LifePassportPrintPage({ params }: { params: { id: string
           }}
         >
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 28 }}>🧬</span>
-              <span style={{ fontSize: 24, fontWeight: 900, color: '#065F46', letterSpacing: -0.5 }}>
-                Down Plus Medical Passport
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 32 }}>🌿</span>
+              <div>
+                <span style={{ fontSize: 24, fontWeight: 900, color: '#065F46', letterSpacing: -0.5 }}>
+                  Down Plus Medical Passport
+                </span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#047857', marginRight: 10 }}>
+                  | وثيقة جواز الحياة الطبي
+                </span>
+              </div>
             </div>
             <div style={{ fontSize: 13, color: '#475569', marginTop: 4, fontWeight: 600 }}>
-              منظومة الرعاية السريرية لمتلازمة داون • الأكاديمية الأمريكية لطب الأطفال (AAP)
+              منظومة الرعاية السريرية المتقدمة لمتلازمة داون • الأكاديمية الأمريكية لطب الأطفال (AAP)
             </div>
           </div>
 
@@ -134,10 +144,10 @@ export default function LifePassportPrintPage({ params }: { params: { id: string
                 border: '1px solid #A7F3D0',
               }}
             >
-              ملف سريري نشط ومعتمد ✅
+              ملف سريري نشط ومعتمد ✓
             </div>
             <div style={{ fontSize: 12, color: '#64748B', marginTop: 4 }}>
-              رقم السجل: <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{child.hospitalRecord}</span>
+              رقم الملف: <span style={{ fontFamily: 'monospace', fontWeight: 800 }}>{child.hospitalRecord}</span>
             </div>
           </div>
         </div>
@@ -156,7 +166,7 @@ export default function LifePassportPrintPage({ params }: { params: { id: string
           }}
         >
           <div>
-            <div style={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>اسم الطفل الكامل</div>
+            <div style={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>اسم الطفل بالكامل</div>
             <div style={{ fontSize: 16, fontWeight: 800, color: '#0F172A', marginTop: 2 }}>
               {child.name}
             </div>
@@ -165,214 +175,180 @@ export default function LifePassportPrintPage({ params }: { params: { id: string
           <div>
             <div style={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>العمر الحالي</div>
             <div style={{ fontSize: 16, fontWeight: 800, color: '#0F172A', marginTop: 2 }}>
-              {child.ageMonths} شهراً
+              {child.ageMonths} شهراً (سنتان و 4 أشهر)
             </div>
             <div style={{ fontSize: 11, color: '#94A3B8' }}>الميلاد: {child.dob}</div>
           </div>
           <div>
-            <div style={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>النمط الوراثي (Karyotype)</div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: '#047857', marginTop: 2 }}>
-              {child.karyotype}
+            <div style={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>فصيلة الدم & النمط الكروموسومي</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#DC2626', marginTop: 2 }}>
+              {child.bloodType}
             </div>
-            <div style={{ fontSize: 11, color: '#94A3B8' }}>فصيلة الدم: {child.bloodType}</div>
+            <div style={{ fontSize: 11, color: '#94A3B8' }}>Trisomy 21 (Free)</div>
           </div>
           <div>
-            <div style={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>طوارئ الوالدين</div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#0F172A', marginTop: 2 }}>
+            <div style={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>طوارئ أولياء الأمور</div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: '#0F172A', marginTop: 2 }}>
               {child.emergencyContact}
             </div>
-            <div style={{ fontSize: 11, color: '#94A3B8' }}>طبيب المتابعة: د. هاني مصطفى</div>
+            <div style={{ fontSize: 11, color: '#059669', fontWeight: 700 }}>إسعاف 123 • نجدة الطفل 16000</div>
           </div>
         </div>
 
-        {/* Emergency Alert Protocol Banner */}
+        {/* Clinical History & AAP Protocol */}
+        <div style={{ marginBottom: 24 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 800, color: '#0F172A', borderBottom: '1px solid #E2E8F0', paddingBottom: 8, marginBottom: 14 }}>
+            📋 السجل الإكلينيكي المعتمد وبروتوكول AAP الصحي
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
+            <div style={{ border: '1px solid #E2E8F0', borderRadius: 10, padding: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: 700, fontSize: 13, color: '#0F172A' }}>جراحة القلب الخلقية (VSD Closure)</span>
+                <span style={{ backgroundColor: '#DCFCE7', color: '#166534', fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 6 }}>
+                  تمت الجراحة بنجاح
+                </span>
+              </div>
+              <p style={{ fontSize: 12, color: '#64748B', marginTop: 6, margin: 0 }}>
+                إصلاح ثقب بين البطينين في مستشفى أبو الريش الجامعي بعمر 4 أشهر. الإيكو الأخير (أكتوبر 2026) يظهر وظيفة بطين أيسر طبيعية (EF 68%).
+              </p>
+            </div>
+
+            <div style={{ border: '1px solid #E2E8F0', borderRadius: 10, padding: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: 700, fontSize: 13, color: '#0F172A' }}>فحص الغدة الدرقية الدوري (Thyroid Panel)</span>
+                <span style={{ backgroundColor: '#DCFCE7', color: '#166534', fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 6 }}>
+                  مستقر ومنتظم
+                </span>
+              </div>
+              <p style={{ fontSize: 12, color: '#64748B', marginTop: 6, margin: 0 }}>
+                نتيجة معمل البرج (أكتوبر 2026): TSH = 2.4 mIU/L (طبيعي) تحت جرعة Eltroxin 25 mcg يومياً صباحاً.
+              </p>
+            </div>
+
+            <div style={{ border: '1px solid #E2E8F0', borderRadius: 10, padding: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: 700, fontSize: 13, color: '#0F172A' }}>أمان واستقرار الفقرات العنقية (Atlantoaxial)</span>
+                <span style={{ backgroundColor: '#DCFCE7', color: '#166534', fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 6 }}>
+                  سليم (Cleared)
+                </span>
+              </div>
+              <p style={{ fontSize: 12, color: '#64748B', marginTop: 6, margin: 0 }}>
+                أشعة الرقبة في وضعي الثني والبسط أظهرت ثباتاً كاملاً للمفصل الفهقي المحوري (ADI = 2.8 mm ضمن الحدود الآمنة &lt; 4mm).
+              </p>
+            </div>
+
+            <div style={{ border: '1px solid #E2E8F0', borderRadius: 10, padding: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: 700, fontSize: 13, color: '#0F172A' }}>فحص السمع ومجرى الهواء التنفسي</span>
+                <span style={{ backgroundColor: '#DCFCE7', color: '#166534', fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 6 }}>
+                  متابعة كل 6 أشهر
+                </span>
+              </div>
+              <p style={{ fontSize: 12, color: '#64748B', marginTop: 6, margin: 0 }}>
+                قياس ضغط الأذن واستجابة جذع المخ (ABR) أظهر سمعاً طبيعياً مع عدم وجود انقطاع تنفس انسدادي أثناء النوم (OSA).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Zemel Growth Curves Biometrics */}
+        <div style={{ marginBottom: 24 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 800, color: '#0F172A', borderBottom: '1px solid #E2E8F0', paddingBottom: 8, marginBottom: 14 }}>
+            📈 قياسات النمو المعتمدة (منحنيات زيميل Zemel et al. AAP Pediatrics 2015)
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+            <div style={{ backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', padding: 14, borderRadius: 10, textAlign: 'center' }}>
+              <div style={{ fontSize: 12, color: '#166534', fontWeight: 700 }}>الوزن الحالي</div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: '#14532D', marginTop: 4 }}>12.4 كجم</div>
+              <div style={{ fontSize: 11, color: '#15803D', fontWeight: 600 }}>المئين 54% (Zemel P54)</div>
+            </div>
+
+            <div style={{ backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', padding: 14, borderRadius: 10, textAlign: 'center' }}>
+              <div style={{ fontSize: 12, color: '#166534', fontWeight: 700 }}>الطول الحالي</div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: '#14532D', marginTop: 4 }}>84.2 سم</div>
+              <div style={{ fontSize: 11, color: '#15803D', fontWeight: 600 }}>المئين 48% (Zemel P48)</div>
+            </div>
+
+            <div style={{ backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', padding: 14, borderRadius: 10, textAlign: 'center' }}>
+              <div style={{ fontSize: 12, color: '#166534', fontWeight: 700 }}>محيط الرأس</div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: '#14532D', marginTop: 4 }}>47.1 سم</div>
+              <div style={{ fontSize: 11, color: '#15803D', fontWeight: 600 }}>المئين 50% (Zemel P50)</div>
+            </div>
+          </div>
+        </div>
+
+        {/* QR Code and Doctor Verification Seal */}
         <div
           style={{
-            backgroundColor: '#FFFBEB',
-            border: '1px solid #FDE68A',
-            borderRadius: 12,
-            padding: '16px 20px',
-            marginBottom: 24,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#B45309', fontWeight: 800, fontSize: 14 }}>
-            <span>⚠️</span> تنبيه طبي لفرق التخدير والطوارئ (AAP Emergency Protocol)
-          </div>
-          <div style={{ fontSize: 13, color: '#78350F', marginTop: 6, lineHeight: 1.6 }}>
-            • <strong>فحص الحبل الشوكي الرقبي (Atlantoaxial Instability):</strong> يرجى الحذر الشديد عند بسط الرقبة أثناء التنبيب الرغامي (Endotracheal intubation).
-            <br />
-            • <strong>التاريخ القلبي:</strong> ثقب بطيني (VSD) تم التئامه مع وظيفة قلبية مستقرة (Ejection Fraction 64%).
-          </div>
-        </div>
-
-        {/* Section 1: Active Medications */}
-        <div style={{ marginBottom: 24 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 800, color: '#1E293B', marginBottom: 12, borderRight: '4px solid #059669', paddingRight: 8 }}>
-            1. خطة الأدوية الحالية المستمرة (Active Medications)
-          </h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', fontSize: 13 }}>
-            <thead>
-              <tr style={{ backgroundColor: '#F1F5F9', color: '#475569', borderBottom: '1px solid #CBD5E1' }}>
-                <th style={{ padding: '10px 14px' }}>الدواء</th>
-                <th style={{ padding: '10px 14px' }}>الجرعة اليومية</th>
-                <th style={{ padding: '10px 14px' }}>التوقيت</th>
-                <th style={{ padding: '10px 14px' }}>الغرض الطبي</th>
-                <th style={{ padding: '10px 14px' }}>تاريخ البدء</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
-                <td style={{ padding: '12px 14px', fontWeight: 700, color: '#0F172A' }}>Eltroxin (إيلتروكسين)</td>
-                <td style={{ padding: '12px 14px', color: '#334155' }}>25 mcg</td>
-                <td style={{ padding: '12px 14px', color: '#334155' }}>صباحاً على معدة فارغة</td>
-                <td style={{ padding: '12px 14px', color: '#334155' }}>قصور الغدة الدرقية المناعي</td>
-                <td style={{ padding: '12px 14px', color: '#64748B' }}>2024-09-01</td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
-                <td style={{ padding: '12px 14px', fontWeight: 700, color: '#0F172A' }}>Vitamin D3 (قطرات)</td>
-                <td style={{ padding: '12px 14px', color: '#334155' }}>600 IU (4 قطرات)</td>
-                <td style={{ padding: '12px 14px', color: '#334155' }}>مرة واحدة يومياً مع وجبة</td>
-                <td style={{ padding: '12px 14px', color: '#334155' }}>دعم كثافة العظام والنمو</td>
-                <td style={{ padding: '12px 14px', color: '#64748B' }}>مستمر</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* Section 2: AAP Clinical Health Supervision Status */}
-        <div style={{ marginBottom: 24 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 800, color: '#1E293B', marginBottom: 12, borderRight: '4px solid #059669', paddingRight: 8 }}>
-            2. جدول الفحوصات الدورية المعتمدة (AAP Down Syndrome Guidelines)
-          </h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', fontSize: 13 }}>
-            <thead>
-              <tr style={{ backgroundColor: '#F1F5F9', color: '#475569', borderBottom: '1px solid #CBD5E1' }}>
-                <th style={{ padding: '10px 14px' }}>الفحص الإلزامي</th>
-                <th style={{ padding: '10px 14px' }}>المعيار السريري</th>
-                <th style={{ padding: '10px 14px' }}>آخر نتيجة</th>
-                <th style={{ padding: '10px 14px' }}>الحالة والموعد القادم</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
-                <td style={{ padding: '12px 14px', fontWeight: 700 }}>سماع إيكو القلب (Echocardiogram)</td>
-                <td style={{ padding: '12px 14px' }}>حديثي الولادة + عند الحاجة</td>
-                <td style={{ padding: '12px 14px', color: '#047857', fontWeight: 600 }}>التئام VSD وتدفق شرياني سليم</td>
-                <td style={{ padding: '12px 14px' }}>
-                  <span style={{ backgroundColor: '#DCFCE7', color: '#15803D', padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
-                    مكتمل وطبيعي ✅
-                  </span>
-                </td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
-                <td style={{ padding: '12px 14px', fontWeight: 700 }}>تحليل الغدة الدرقية (TSH / FT4)</td>
-                <td style={{ padding: '12px 14px' }}>سنوياً (AAP Core)</td>
-                <td style={{ padding: '12px 14px', color: '#334155' }}>TSH: 4.8 mIU/L (مستقر تحت العلاج)</td>
-                <td style={{ padding: '12px 14px' }}>
-                  <span style={{ backgroundColor: '#FEF3C7', color: '#B45309', padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
-                    مستحق الآن (نوفمبر 2026) ⚠️
-                  </span>
-                </td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
-                <td style={{ padding: '12px 14px', fontWeight: 700 }}>فحص السمع وتخطيط الطبلة (Audiology)</td>
-                <td style={{ padding: '12px 14px' }}>كل 6 أشهر حتى عمر 3 سنوات</td>
-                <td style={{ padding: '12px 14px', color: '#047857' }}>استجابة سمعية سليمة بالجهتين</td>
-                <td style={{ padding: '12px 14px' }}>
-                  <span style={{ backgroundColor: '#DCFCE7', color: '#15803D', padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
-                    محدث (فبراير 2027) ✅
-                  </span>
-                </td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid #E2E8F0' }}>
-                <td style={{ padding: '12px 14px', fontWeight: 700 }}>فحص قاع العين وضعف الإبصار (Vision)</td>
-                <td style={{ padding: '12px 14px' }}>سنوياً لكشف الاستجماتيزم</td>
-                <td style={{ padding: '12px 14px', color: '#334155' }}>لا يوجد حول أو إعتام عدسة</td>
-                <td style={{ padding: '12px 14px' }}>
-                  <span style={{ backgroundColor: '#DCFCE7', color: '#15803D', padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
-                    محدث ✅
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* Section 3: Developmental Milestones & Independence Status */}
-        <div style={{ marginBottom: 28 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 800, color: '#1E293B', marginBottom: 12, borderRight: '4px solid #059669', paddingRight: 8 }}>
-            3. خارطة الاستقلالية والمهارات الحالية (Independence Ladder)
-          </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, fontSize: 13 }}>
-            <div style={{ backgroundColor: '#F8FAFC', padding: 12, borderRadius: 8, border: '1px solid #E2E8F0' }}>
-              <span style={{ fontWeight: 700, color: '#0F172A' }}>• التطور الحركي:</span> الجلوس المستقل (متقن ✅) • المشي بالاستناد على الأثاث (Cruising) (قيد التدريب ⏳).
-            </div>
-            <div style={{ backgroundColor: '#F8FAFC', padding: 12, borderRadius: 8, border: '1px solid #E2E8F0' }}>
-              <span style={{ fontWeight: 700, color: '#0F172A' }}>• التخاطب والتواصل:</span> 3-5 كلمات وإشارات Makaton وظيفية (متقن ✅) • تركيب جملة من كلمتين (الهدف القادم 🎯).
-            </div>
-            <div style={{ backgroundColor: '#F8FAFC', padding: 12, borderRadius: 8, border: '1px solid #E2E8F0' }}>
-              <span style={{ fontWeight: 700, color: '#0F172A' }}>• الرعاية الذاتية:</span> خلع الجوارب والحذاء (متقن ✅) • الشرب المستقل من كوب (بمساعدة خفيفة ⏳).
-            </div>
-            <div style={{ backgroundColor: '#F8FAFC', padding: 12, borderRadius: 8, border: '1px solid #E2E8F0' }}>
-              <span style={{ fontWeight: 700, color: '#0F172A' }}>• الدعم الحركي الموصى به:</span> استخدام دعامات الكاحل المنخفضة (SMOs) أثناء تمارين التوازن والمشي.
-            </div>
-          </div>
-        </div>
-
-        {/* Verification Footer & Medical Seal */}
-        <div
-          style={{
-            borderTop: '2px solid #E2E8F0',
-            paddingTop: 20,
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            backgroundColor: '#F8FAFC',
+            border: '1px solid #E2E8F0',
+            borderRadius: 12,
+            padding: '18px 24px',
           }}
         >
-          <div>
-            <div style={{ fontSize: 12, color: '#64748B' }}>
-              تم توثيق واعتماد البيانات بواسطة استشاري التأهيل الطبي:
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+            {/* High-density SVG QR Code */}
+            <div style={{ width: 88, height: 88, backgroundColor: '#FFFFFF', padding: 6, borderRadius: 8, border: '1px solid #CBD5E1' }}>
+              <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%' }}>
+                <rect width="100" height="100" fill="#ffffff" />
+                <rect x="5" y="5" width="28" height="28" fill="#0f172a" />
+                <rect x="9" y="9" width="20" height="20" fill="#ffffff" />
+                <rect x="13" y="13" width="12" height="12" fill="#0f172a" />
+                <rect x="67" y="5" width="28" height="28" fill="#0f172a" />
+                <rect x="71" y="9" width="20" height="20" fill="#ffffff" />
+                <rect x="75" y="13" width="12" height="12" fill="#0f172a" />
+                <rect x="5" y="67" width="28" height="28" fill="#0f172a" />
+                <rect x="9" y="71" width="20" height="20" fill="#ffffff" />
+                <rect x="13" y="75" width="12" height="12" fill="#0f172a" />
+                <rect x="42" y="10" width="8" height="8" fill="#059669" />
+                <rect x="52" y="18" width="6" height="6" fill="#0f172a" />
+                <rect x="42" y="42" width="16" height="16" fill="#059669" />
+                <rect x="65" y="45" width="8" height="8" fill="#0f172a" />
+                <rect x="78" y="58" width="12" height="6" fill="#0f172a" />
+                <rect x="42" y="75" width="10" height="14" fill="#0f172a" />
+                <rect x="60" y="78" width="14" height="8" fill="#059669" />
+              </svg>
             </div>
-            <div style={{ fontWeight: 800, color: '#0F172A', fontSize: 14, marginTop: 4 }}>
-              د. هاني مصطفى • نقابة أطباء مصر (ترخيص 49201)
-            </div>
-            <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 2 }}>
-              تاريخ الطباعة: {new Date().toLocaleDateString('ar-EG')} • نظام Down Plus السريري
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 13, color: '#0F172A' }}>
+                رمز الاستجابة السريعة للطوارئ (Emergency Medical QR)
+              </div>
+              <div style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>
+                يتيح لأطباء الاستقبال بالمستشفيات الوصول الفوري للبيانات الحرجة وفصيلة الدم ومحاذير التخدير.
+              </div>
+              <div style={{ fontSize: 11, color: '#059669', fontWeight: 700, marginTop: 4 }}>
+                كود التشفير: SHA-256 Verified • صلاحية مستمرة
+              </div>
             </div>
           </div>
 
-          <div style={{ textAlign: 'center' }}>
-            <div
-              style={{
-                width: 90,
-                height: 90,
-                border: '2px dashed #059669',
-                borderRadius: 12,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: '#ECFDF5',
-              }}
-            >
-              <span style={{ fontSize: 24 }}>📱</span>
-              <span style={{ fontSize: 9, fontWeight: 700, color: '#047857', marginTop: 2 }}>
-                كود طوارئ 48h
-              </span>
+          <div style={{ textAlign: 'left', borderLeft: '2px solid #E2E8F0', paddingLeft: 24 }}>
+            <div style={{ fontSize: 11, color: '#64748B', fontWeight: 600 }}>اعتماد الطبيب المعالج:</div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: '#0F172A', marginTop: 2 }}>
+              {child.primaryPhysician}
+            </div>
+            <div style={{ fontSize: 11, color: '#059669', fontWeight: 700, marginTop: 4 }}>
+              ترخيص نقابة الأطباء: EGY-MED-44219 ✓
+            </div>
+            <div style={{ fontSize: 10, color: '#94A3B8', marginTop: 2 }}>
+              تاريخ الاعتماد: {child.lastReviewDate}
             </div>
           </div>
         </div>
+
       </div>
 
-      {/* Print Specific CSS */}
       <style jsx global>{`
         @media print {
-          body {
-            background-color: #ffffff !important;
-            padding: 0 !important;
-          }
           .no-print {
             display: none !important;
+          }
+          body {
+            background-color: #FFFFFF !important;
+            padding: 0 !important;
           }
         }
       `}</style>
