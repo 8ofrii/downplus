@@ -209,7 +209,9 @@ console.log('Extracting from raw slides:', rawSlides.length);
 // We will construct the slides according to the optimized narrative:
 
 // SLIDE 1: Cover
-const slide1 = `  <!-- SLIDE 1: COVER -->` + rawSlides[1].substring(rawSlides[1].indexOf('\n'));
+let slide1Content = rawSlides[1].substring(rawSlides[1].indexOf('\n'));
+slide1Content = slide1Content.replace(/<div class="pill pill-amber"[^>]*>.*?<\/div>/s, '<div class="pill pill-primary" style="height:36px"><span class="dot"></span> Enterprise Digital Health Platform Blueprint</div>');
+const slide1 = `  <!-- SLIDE 1: COVER -->` + slide1Content;
 
 // SLIDE 2: Problem & Opportunity
 const slide2 = `  <!-- SLIDE 2: THE PROBLEM & MARKET OPPORTUNITY -->` + rawSlides[2].substring(rawSlides[2].indexOf('\n'));
