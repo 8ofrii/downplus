@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from 'react-native';
 import { Colors, Shadows } from '../../constants/theme';
 import { api } from '../../services/api';
@@ -42,6 +43,37 @@ export default function ChatScreen() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [bookedDoctor, setBookedDoctor] = useState<string | null>(null);
+
+  // In-App Doctor Booking & Telehealth Consultation Flow
+  const [bookingDoctor, setBookingDoctor] = useState<DoctorCard | null>(null);
+  const [bookingMode, setBookingMode] = useState<'clinic' | 'telehealth'>('clinic');
+  const [selectedSlot, setSelectedSlot] = useState<string>('الأربعاء 6:00 م');
+  const [paymentMethod, setPaymentMethod] = useState<'vodafone_cash' | 'card'>('vodafone_cash');
+  const [bookingProcessing, setBookingProcessing] = useState(false);
+  const [confirmedVoucher, setConfirmedVoucher] = useState<{
+    id: string;
+    doctorName: string;
+    slot: string;
+    mode: string;
+    fee: number;
+  } | null>(null);
+
+  const handleConfirmBooking = () => {
+    if (!bookingDoctor) return;
+    setBookingProcessing(true);
+    setTimeout(() => {
+      setBookingProcessing(false);
+      setBookedDoctor(bookingDoctor.doctor_id);
+      const voucher = {
+        id: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
+        doctorName: bookingDoctor.name,
+        slot: selectedSlot,
+        mode: bookingMode === 'clinic' ? 'كشف بالعيادة' : 'استشارة فيديو أونلاين',
+        fee: bookingDoctor.fee,
+      };
+      setConfirmedVoucher(voucher);
+    }, 1200);
+  };
 
   const handleSend = async (presetText?: string) => {
     const textToSend = presetText || input;
@@ -187,11 +219,11 @@ export default function ChatScreen() {
                             styles.bookDocBtn,
                             bookedDoctor === doc.doctor_id && styles.bookDocBtnDone,
                           ]}
-                          onPress={() => setBookedDoctor(doc.doctor_id)}
+                          onPress={() => setBookingDoctor(doc)}
                           activeOpacity={0.85}
                         >
                           <Text style={styles.bookDocBtnText}>
-                            {bookedDoctor === doc.doctor_id ? 'تم طلب الموعد ✓' : 'حجز موعد الآن'}
+                            {bookedDoctor === doc.doctor_id ? 'تم الحجز ✓' : 'حجز موعد الآن'}
                           </Text>
                         </TouchableOpacity>
                       </View>
@@ -254,6 +286,187 @@ export default function ChatScreen() {
           <Text style={styles.sendButtonText}>إرسال</Text>
         </TouchableOpacity>
       </View>
+
+      {/* ── Interactive Doctor Booking Modal ── */}
+      <Modal visible={!!bookingDoctor} transparent animationType="slide">
+        <View style={styles.bookingModalOverlay}>
+          <View style={styles.bookingModalCard}>
+            {confirmedVoucher ? (
+              // Booking Confirmed Voucher View
+              <View style={styles.voucherContainer}>
+                <View style={styles.voucherCheckCircle}>
+                  <Text style={{ fontSize: 32 }}>🎉</Text>
+                </View>
+                <Text style={styles.voucherTitle}>تم تأكيد الحجز بنجاح!</Text>
+                <Text style={styles.voucherSub}>
+                  تم تسجيل الموعد وإرسال تأكيد الحجز والفاتورة عبر واتساب
+                </Text>
+
+                <View style={styles.voucherDetailsCard}>
+                  <View style={styles.voucherRow}>
+                    <Text style={styles.voucherLabel}>رقم الحجز المرجعي:</Text>
+                    <Text style={styles.voucherValueHighlight}>{confirmedVoucher.id}</Text>
+                  </View>
+                  <View style={styles.voucherRow}>
+                    <Text style={styles.voucherLabel}>الطبيب المعالج:</Text>
+                    <Text style={styles.voucherValue}>{confirmedVoucher.doctorName}</Text>
+                  </View>
+                  <View style={styles.voucherRow}>
+                    <Text style={styles.voucherLabel}>الموعد المحدد:</Text>
+                    <Text style={styles.voucherValue}>{confirmedVoucher.slot}</Text>
+                  </View>
+                  <View style={styles.voucherRow}>
+                    <Text style={styles.voucherLabel}>نوع الاستشارة:</Text>
+                    <Text style={styles.voucherValue}>{confirmedVoucher.mode}</Text>
+                  </View>
+                  <View style={styles.voucherRow}>
+                    <Text style={styles.voucherLabel}>المبلغ المدفوع:</Text>
+                    <Text style={[styles.voucherValue, { color: Colors.primary, fontWeight: '800' }]}>
+                      {confirmedVoucher.fee} ج.م
+                    </Text>
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.closeVoucherBtn}
+                  onPress={() => {
+                    setConfirmedVoucher(null);
+                    setBookingDoctor(null);
+                  }}
+                  activeOpacity={0.85}
+                >
+                  <Text style={styles.closeVoucherText}>إغلاق والعودة للمحادثة</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              // Booking Options View
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={styles.bookingHeader}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.bookingTitle}>حجز موعد استشارة طبية 🩺</Text>
+                    <Text style={styles.bookingSub}>
+                      {bookingDoctor?.name} • {bookingDoctor?.specialty}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => setBookingDoctor(null)}
+                    style={styles.bookingCloseBtn}
+                  >
+                    <Text style={styles.bookingCloseText}>✕</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Consultation Mode Switcher */}
+                <Text style={styles.fieldSectionLabel}>اختر نوع الاستشارة:</Text>
+                <View style={styles.modeSwitcher}>
+                  <TouchableOpacity
+                    style={[styles.modeBtn, bookingMode === 'clinic' && styles.modeBtnActive]}
+                    onPress={() => setBookingMode('clinic')}
+                    activeOpacity={0.85}
+                  >
+                    <Text style={{ fontSize: 18 }}>🏥</Text>
+                    <Text style={[styles.modeBtnText, bookingMode === 'clinic' && styles.modeBtnTextActive]}>
+                      كشف بالعيادة
+                    </Text>
+                    <Text style={styles.modeSubText}>({bookingDoctor?.city})</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.modeBtn, bookingMode === 'telehealth' && styles.modeBtnActive]}
+                    onPress={() => setBookingMode('telehealth')}
+                    activeOpacity={0.85}
+                  >
+                    <Text style={{ fontSize: 18 }}>📹</Text>
+                    <Text style={[styles.modeBtnText, bookingMode === 'telehealth' && styles.modeBtnTextActive]}>
+                      استشارة فيديو
+                    </Text>
+                    <Text style={styles.modeSubText}>(أونلاين مشفرة)</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Slot Selection */}
+                <Text style={styles.fieldSectionLabel}>اختر الموعد المتاح:</Text>
+                <View style={styles.slotsGrid}>
+                  {['اليوم 6:00 م', 'غداً 4:30 م', 'الخميس 7:00 م', 'السبت 5:00 م'].map((slot) => (
+                    <TouchableOpacity
+                      key={slot}
+                      style={[styles.slotChip, selectedSlot === slot && styles.slotChipActive]}
+                      onPress={() => setSelectedSlot(slot)}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={[styles.slotChipText, selectedSlot === slot && styles.slotChipTextActive]}>
+                        {slot}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {/* Payment Selection */}
+                <Text style={styles.fieldSectionLabel}>طريقة السداد:</Text>
+                <View style={styles.paymentMethods}>
+                  <TouchableOpacity
+                    style={[styles.paymentCard, paymentMethod === 'vodafone_cash' && styles.paymentCardActive]}
+                    onPress={() => setPaymentMethod('vodafone_cash')}
+                    activeOpacity={0.85}
+                  >
+                    <Text style={{ fontSize: 20 }}>📱</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.paymentTitle}>محفظة إلكترونية (فودافون / أورنج كاش)</Text>
+                      <Text style={styles.paymentSub}>تحويل فوري بدون رسوم إضافية</Text>
+                    </View>
+                    <View style={[styles.radioCircle, paymentMethod === 'vodafone_cash' && styles.radioCircleActive]} />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.paymentCard, paymentMethod === 'card' && styles.paymentCardActive]}
+                    onPress={() => setPaymentMethod('card')}
+                    activeOpacity={0.85}
+                  >
+                    <Text style={{ fontSize: 20 }}>💳</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.paymentTitle}>بطاقة بنكية (ميزة / فيزا / ماستركارد)</Text>
+                      <Text style={styles.paymentSub}>دفع إلكتروني آمن عبر Paymob</Text>
+                    </View>
+                    <View style={[styles.radioCircle, paymentMethod === 'card' && styles.radioCircleActive]} />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Fee Breakdown */}
+                <View style={styles.feeBreakdownCard}>
+                  <View style={styles.feeRow}>
+                    <Text style={styles.feeLabel}>قيمة الكشف:</Text>
+                    <Text style={styles.feeValue}>{bookingDoctor?.fee} ج.م</Text>
+                  </View>
+                  <View style={styles.feeRow}>
+                    <Text style={styles.feeLabel}>رسوم المنصة والمراجعة الإكلينيكية (15%):</Text>
+                    <Text style={[styles.feeValue, { color: '#059669' }]}>شاملة مجاناً</Text>
+                  </View>
+                  <View style={[styles.feeRow, { borderTopWidth: 1, borderTopColor: '#E2E8F0', paddingTop: 6 }]}>
+                    <Text style={[styles.feeLabel, { fontWeight: '800', color: '#0F172A' }]}>الإجمالي للدفع:</Text>
+                    <Text style={[styles.feeValue, { fontWeight: '900', color: Colors.primary, fontSize: 16 }]}>
+                      {bookingDoctor?.fee} ج.م
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Confirm Action Button */}
+                <TouchableOpacity
+                  style={styles.confirmBookingBtn}
+                  onPress={handleConfirmBooking}
+                  disabled={bookingProcessing}
+                  activeOpacity={0.85}
+                >
+                  {bookingProcessing ? (
+                    <ActivityIndicator color="#FFFFFF" size="small" />
+                  ) : (
+                    <Text style={styles.confirmBookingBtnText}>تأكيد الحجز والدفع الآن 💳</Text>
+                  )}
+                </TouchableOpacity>
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -568,5 +781,262 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '800',
     fontSize: 13,
+  },
+
+  // Booking Modal Styles
+  bookingModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    justifyContent: 'flex-end',
+  },
+  bookingModalCard: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    padding: 20,
+    maxHeight: '85%',
+  },
+  bookingHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  bookingTitle: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#0F172A',
+  },
+  bookingSub: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  bookingCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bookingCloseText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  fieldSectionLabel: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#1E293B',
+    marginBottom: 8,
+    marginTop: 6,
+  },
+  modeSwitcher: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 14,
+  },
+  modeBtn: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 16,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    alignItems: 'center',
+    gap: 4,
+  },
+  modeBtnActive: {
+    backgroundColor: '#F0FDF4',
+    borderColor: '#10B981',
+  },
+  modeBtnText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#475569',
+  },
+  modeBtnTextActive: {
+    color: '#047857',
+  },
+  modeSubText: {
+    fontSize: 10,
+    color: '#94A3B8',
+  },
+  slotsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 14,
+  },
+  slotChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  slotChipActive: {
+    backgroundColor: '#ECFDF5',
+    borderColor: '#10B981',
+  },
+  slotChipText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  slotChipTextActive: {
+    color: '#047857',
+    fontWeight: '800',
+  },
+  paymentMethods: {
+    gap: 8,
+    marginBottom: 14,
+  },
+  paymentCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 12,
+    borderRadius: 14,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+  },
+  paymentCardActive: {
+    backgroundColor: '#F0FDF4',
+    borderColor: '#10B981',
+  },
+  paymentTitle: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  paymentSub: {
+    fontSize: 10.5,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  radioCircle: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
+    borderColor: '#CBD5E1',
+  },
+  radioCircleActive: {
+    borderColor: '#10B981',
+    backgroundColor: '#10B981',
+  },
+  feeBreakdownCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    padding: 12,
+    gap: 6,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  feeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  feeLabel: {
+    fontSize: 12,
+    color: '#64748B',
+  },
+  feeValue: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  confirmBookingBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    ...Shadows.glowPrimary,
+  },
+  confirmBookingBtnText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+
+  // Voucher View
+  voucherContainer: {
+    alignItems: 'center',
+    paddingVertical: 16,
+    gap: 12,
+  },
+  voucherCheckCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#ECFDF5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#6EE7B7',
+  },
+  voucherTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#065F46',
+  },
+  voucherSub: {
+    fontSize: 12,
+    color: '#64748B',
+    textAlign: 'center',
+    maxWidth: '85%',
+  },
+  voucherDetailsCard: {
+    width: '100%',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    padding: 14,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginVertical: 8,
+  },
+  voucherRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  voucherLabel: {
+    fontSize: 12,
+    color: '#64748B',
+  },
+  voucherValue: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  voucherValueHighlight: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#0284C7',
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
+  closeVoucherBtn: {
+    width: '100%',
+    backgroundColor: '#F1F5F9',
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    marginTop: 6,
+  },
+  closeVoucherText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#334155',
   },
 });

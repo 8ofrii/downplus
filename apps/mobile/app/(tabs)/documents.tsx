@@ -64,6 +64,69 @@ export default function DocumentsScreen() {
   const [uploadModal, setUploadModal] = useState(false);
   const [uploading, setUploading] = useState(false);
 
+  // Smart Lab & Rx OCR Camera Scanner State
+  const [scannerModal, setScannerModal] = useState(false);
+  const [scanningState, setScanningState] = useState<'viewfinder' | 'analyzing' | 'extracted'>('viewfinder');
+  const [scannedData, setScannedData] = useState<{
+    title: string;
+    lab: string;
+    icon: string;
+    category: string;
+    metrics: { label: string; value: string; flag: string }[];
+    clinicalNote: string;
+  } | null>(null);
+
+  const startScanSimulation = (sampleType: 'thyroid' | 'echo') => {
+    setScanningState('analyzing');
+    setTimeout(() => {
+      if (sampleType === 'thyroid') {
+        setScannedData({
+          title: 'فحص وظائف الغدة الدرقية الشامل (TSH / FT4)',
+          lab: 'معامل البرج - فرع المعادي (Al Borg Diagnostics)',
+          icon: '🩸',
+          category: 'Lab',
+          metrics: [
+            { label: 'TSH (Thyroid Stimulating Hormone)', value: '3.4 µIU/mL', flag: 'نطاق طبيعي (0.4 - 4.5)' },
+            { label: 'Free T4 (الثيروكسين الحر)', value: '1.25 ng/dL', flag: 'طبيعي ومستقر' },
+          ],
+          clinicalNote: 'الجرعة اليومية الحالية من دواء إيلتروكسين (25 ميكروجرام) متوافقة تماماً مع العمر والوزن.',
+        });
+      } else {
+        setScannedData({
+          title: 'تقرير موجات صوتية وإيكو القلب (Echocardiogram)',
+          lab: 'مستشفى أبوالريش التخصصي للأطفال',
+          icon: '🫀',
+          category: 'Echo',
+          metrics: [
+            { label: 'VSD Status (ثقب ما بين البطينين)', value: 'Fully Closed', flag: 'تئام جراحي كامل ✅' },
+            { label: 'Ejection Fraction (كفاءة العضلة)', value: '65%', flag: 'كفاءة ممتازة' },
+          ],
+          clinicalNote: 'عضلة القلب سليمة تماماً ولا يوجد أي تسريب صمامات. مصرح بكافة الأنشطة الرياضية والسباحة.',
+        });
+      }
+      setScanningState('extracted');
+    }, 1400);
+  };
+
+  const handleApproveScan = () => {
+    if (!scannedData) return;
+    const newDoc: DocItem = {
+      id: `doc-${Date.now()}`,
+      fileName: `${scannedData.category.toLowerCase()}_scan_${Date.now().toString().slice(-4)}.pdf`,
+      category: scannedData.category,
+      categoryLabel: scannedData.title,
+      status: 'ocr_completed',
+      statusLabel: 'تم التحليل والاستخراج بـ AI ✅',
+      date: '2026-10-31',
+      summary: scannedData.clinicalNote,
+      icon: scannedData.icon,
+    };
+    setDocuments((prev) => [newDoc, ...prev]);
+    setScannerModal(false);
+    setScanningState('viewfinder');
+    setScannedData(null);
+  };
+
   const simulateUpload = (category: string, categoryLabel: string, icon: string, name: string) => {
     setUploadModal(false);
     setUploading(true);
@@ -110,13 +173,27 @@ export default function DocumentsScreen() {
             يتم تشفير كافة التقارير بتقنية AES-256، ومعالجتها بنموذج OCR الطبي لاستخراج التشخيصات الحركية والقلبية والغدة تلقائياً.
           </Text>
 
-          <TouchableOpacity
-            style={styles.uploadBtn}
-            onPress={() => setUploadModal(true)}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.uploadBtnText}>+ إضافة تقرير أو فحص مخبري جديد</Text>
-          </TouchableOpacity>
+          <View style={styles.headerBtnRow}>
+            <TouchableOpacity
+              style={styles.cameraScanBtn}
+              onPress={() => {
+                setScanningState('viewfinder');
+                setScannerModal(true);
+              }}
+              activeOpacity={0.85}
+            >
+              <Text style={{ fontSize: 16 }}>📷</Text>
+              <Text style={styles.cameraScanBtnText}>مسح ضوئي ذكي بالكاميرا (AI OCR)</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.uploadBtn}
+              onPress={() => setUploadModal(true)}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.uploadBtnText}>+ رفع ملف PDF</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {uploading && (
@@ -235,6 +312,126 @@ export default function DocumentsScreen() {
                 </TouchableOpacity>
               ))}
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── Smart Lab & Rx AI OCR Scanner Modal ── */}
+      <Modal visible={scannerModal} transparent animationType="slide">
+        <View style={styles.scannerModalOverlay}>
+          <View style={styles.scannerModalCard}>
+            <View style={styles.scannerHeader}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.scannerTitle}>الماسح الذكي للتقارير والتحاليل 📷</Text>
+                <Text style={styles.scannerSub}>
+                  التعرف الضوئي التلقائي (Medical Vision OCR) لاستخراج المؤشرات الحيوية
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  setScannerModal(false);
+                  setScanningState('viewfinder');
+                  setScannedData(null);
+                }}
+                style={styles.scannerCloseBtn}
+              >
+                <Text style={styles.scannerCloseText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            {scanningState === 'viewfinder' && (
+              <View style={styles.viewfinderContainer}>
+                <View style={styles.cameraBox}>
+                  <View style={[styles.corner, styles.cornerTL]} />
+                  <View style={[styles.corner, styles.cornerTR]} />
+                  <View style={[styles.corner, styles.cornerBL]} />
+                  <View style={[styles.corner, styles.cornerBR]} />
+                  <View style={styles.laserLine} />
+                  <View style={styles.cameraCenterHint}>
+                    <Text style={{ fontSize: 36, opacity: 0.8 }}>📄</Text>
+                    <Text style={styles.cameraInstruction}>
+                      وجّه الكاميرا نحو ورقة التحليل أو تقرير الطبيب
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={styles.sampleScanLabel}>اختر نموذج فحص للتجربة الحية:</Text>
+                <View style={styles.sampleBtnsRow}>
+                  <TouchableOpacity
+                    style={styles.sampleBtn}
+                    onPress={() => startScanSimulation('thyroid')}
+                    activeOpacity={0.85}
+                  >
+                    <Text style={{ fontSize: 18 }}>🩸</Text>
+                    <Text style={styles.sampleBtnText}>مسح تحليل غدة (TSH)</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.sampleBtn}
+                    onPress={() => startScanSimulation('echo')}
+                    activeOpacity={0.85}
+                  >
+                    <Text style={{ fontSize: 18 }}>🫀</Text>
+                    <Text style={styles.sampleBtnText}>مسح إيكو قلب (Echo)</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {scanningState === 'analyzing' && (
+              <View style={styles.analyzingContainer}>
+                <ActivityIndicator color={Colors.primary} size="large" />
+                <Text style={styles.analyzingTitle}>جاري قراءة ومعالجة التقرير الطبي...</Text>
+                <Text style={styles.analyzingDesc}>
+                  تطبيق عازل الخصوصية المصري وتجريد البيانات الشخصية • استخراج المؤشرات المعملية
+                </Text>
+              </View>
+            )}
+
+            {scanningState === 'extracted' && scannedData && (
+              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 420 }}>
+                <View style={styles.extractedCard}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <Text style={{ fontSize: 24 }}>{scannedData.icon}</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.extractedTitle}>{scannedData.title}</Text>
+                      <Text style={styles.extractedLab}>المصدر: {scannedData.lab}</Text>
+                    </View>
+                    <View style={styles.extractedSuccessBadge}>
+                      <Text style={styles.extractedSuccessText}>تم بنجاح ✓</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.metricsBox}>
+                    <Text style={styles.metricsHeader}>القيم والنتائج المستخرجة عبر الذكاء الاصطناعي:</Text>
+                    {scannedData.metrics.map((m, i) => (
+                      <View key={i} style={styles.metricRow}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.metricLabel}>{m.label}</Text>
+                          <Text style={styles.metricFlag}>{m.flag}</Text>
+                        </View>
+                        <Text style={styles.metricValue}>{m.value}</Text>
+                      </View>
+                    ))}
+                  </View>
+
+                  <View style={styles.clinicalNoteBox}>
+                    <Text style={styles.clinicalNoteHeader}>💡 التوصية السريرية للمتابعة:</Text>
+                    <Text style={styles.clinicalNoteBody}>{scannedData.clinicalNote}</Text>
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.approveScanBtn}
+                  onPress={handleApproveScan}
+                  activeOpacity={0.85}
+                >
+                  <Text style={styles.approveScanBtnText}>
+                    اعتماد وربط التقرير بالملف الطبي لعمر ✅
+                  </Text>
+                </TouchableOpacity>
+              </ScrollView>
+            )}
           </View>
         </View>
       </Modal>
@@ -496,5 +693,279 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.textPrimary,
     textAlign: 'center',
+  },
+
+  // Header Button Row
+  headerBtnRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 4,
+  },
+  cameraScanBtn: {
+    flex: 1.4,
+    backgroundColor: Colors.primary,
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    ...Shadows.glowPrimary,
+  },
+  cameraScanBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 12,
+  },
+
+  // Smart Scanner Modal Styles
+  scannerModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    justifyContent: 'flex-end',
+  },
+  scannerModalCard: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    padding: 20,
+    maxHeight: '85%',
+  },
+  scannerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  scannerTitle: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#0F172A',
+  },
+  scannerSub: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  scannerCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scannerCloseText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  viewfinderContainer: {
+    alignItems: 'center',
+    paddingVertical: 10,
+    gap: 14,
+  },
+  cameraBox: {
+    width: '100%',
+    height: 180,
+    backgroundColor: '#0F172A',
+    borderRadius: 20,
+    position: 'relative',
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#334155',
+  },
+  corner: {
+    position: 'absolute',
+    width: 24,
+    height: 24,
+    borderColor: '#38BDF8',
+  },
+  cornerTL: {
+    top: 10,
+    left: 10,
+    borderTopWidth: 3,
+    borderLeftWidth: 3,
+  },
+  cornerTR: {
+    top: 10,
+    right: 10,
+    borderTopWidth: 3,
+    borderRightWidth: 3,
+  },
+  cornerBL: {
+    bottom: 10,
+    left: 10,
+    borderBottomWidth: 3,
+    borderLeftWidth: 3,
+  },
+  cornerBR: {
+    bottom: 10,
+    right: 10,
+    borderBottomWidth: 3,
+    borderRightWidth: 3,
+  },
+  laserLine: {
+    position: 'absolute',
+    left: 14,
+    right: 14,
+    height: 2,
+    backgroundColor: '#10B981',
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  cameraCenterHint: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  cameraInstruction: {
+    fontSize: 12,
+    color: '#CBD5E1',
+    fontWeight: '700',
+  },
+  sampleScanLabel: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#1E293B',
+    alignSelf: 'flex-start',
+  },
+  sampleBtnsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    width: '100%',
+  },
+  sampleBtn: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 14,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    alignItems: 'center',
+    gap: 4,
+  },
+  sampleBtnText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#334155',
+  },
+  analyzingContainer: {
+    alignItems: 'center',
+    paddingVertical: 36,
+    gap: 12,
+  },
+  analyzingTitle: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#0F172A',
+  },
+  analyzingDesc: {
+    fontSize: 12,
+    color: '#64748B',
+    textAlign: 'center',
+    maxWidth: '85%',
+  },
+  extractedCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    marginBottom: 14,
+  },
+  extractedTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  extractedLab: {
+    fontSize: 11,
+    color: '#64748B',
+  },
+  extractedSuccessBadge: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  extractedSuccessText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#15803D',
+  },
+  metricsBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 10,
+    gap: 8,
+    marginVertical: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  metricsHeader: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 2,
+  },
+  metricRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+    paddingBottom: 6,
+  },
+  metricLabel: {
+    fontSize: 11.5,
+    color: '#1E293B',
+    fontWeight: '700',
+  },
+  metricFlag: {
+    fontSize: 9.5,
+    color: '#059669',
+    fontWeight: '700',
+  },
+  metricValue: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: Colors.primary,
+  },
+  clinicalNoteBox: {
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+    borderRadius: 12,
+    padding: 10,
+    gap: 2,
+  },
+  clinicalNoteHeader: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#1E40AF',
+  },
+  clinicalNoteBody: {
+    fontSize: 11,
+    color: '#1E3A8A',
+    lineHeight: 16,
+  },
+  approveScanBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+    ...Shadows.glowPrimary,
+    marginBottom: 10,
+  },
+  approveScanBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 13.5,
   },
 });

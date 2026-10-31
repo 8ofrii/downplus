@@ -195,6 +195,56 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* ── 3.5. Parent Peer Circles & Community Hub ── */}
+        <View style={styles.glassCard}>
+          <View style={styles.cardHeader}>
+            <View style={[styles.cardHeaderIcon, { backgroundColor: '#FEF3C7' }]}>
+              <Text style={{ fontSize: 22 }}>🤝</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text style={styles.cardTitle}>دوائر الدعم الأسري التشاركية</Text>
+                <View style={styles.circleBadge}>
+                  <Text style={styles.circleBadgeText}>1,420 أسرة</Text>
+                </View>
+              </View>
+              <Text style={styles.cardSubTitle}>Down Plus Parent Peer Circles & Community</Text>
+            </View>
+          </View>
+
+          <Text style={styles.cardDesc}>
+            مجتمع تفاعلي آمن يربطك بأسر أطفال متلازمة داون في نفس المرحلة العمرية (2 - 4 سنوات) لتبادل التجارب والنصائح العملية.
+          </Text>
+
+          {/* Active Circle Post Preview */}
+          <View style={styles.circlePostCard}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <View style={styles.parentMiniAvatar}>
+                <Text style={{ fontSize: 13 }}>👩‍🦰</Text>
+              </View>
+              <View>
+                <Text style={styles.parentPostAuthor}>أم يوسف (مدينة نصر)</Text>
+                <Text style={styles.parentPostTime}>منذ ساعتين • تجربة ناجحة 🌟</Text>
+              </View>
+            </View>
+            <Text style={styles.parentPostContent}>
+              "يا جماعة فكرة بطاقات ماكاتون لطلب الماء فرقت جداً مع يوسف هذا الأسبوع! نوبات الغضب قلت بنسبة 80% بمجرد ما بدأ يشاور على كارت الماء."
+            </Text>
+            <View style={styles.postReactionRow}>
+              <Text style={styles.reactionText}>❤️ 48 إعجاب</Text>
+              <Text style={styles.reactionText}>💬 12 تعليق</Text>
+            </View>
+          </View>
+
+          <TouchableOpacity
+            style={styles.circleActionBtn}
+            onPress={() => Alert.alert('دوائر الدعم الأسري 🤝', 'أهلاً بك في دائرة أمهات أبطال داون (2 - 4 سنوات)! يمكنك تصفح الأسئلة ومشاركة تجاربك مع الأسر الشريكة.')}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.circleActionBtnText}>انضمام لنقاشات الدائرة ومشاركة إنجاز 💬</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* ── 4. App Settings & Logout ── */}
         <View style={styles.settingsCard}>
           <View style={styles.settingItem}>
@@ -488,5 +538,77 @@ const styles = StyleSheet.create({
     color: '#B91C1C',
     fontWeight: '700',
     fontSize: 13,
+  },
+
+  // Parent Peer Circles Styles
+  circleBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  circleBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#B45309',
+  },
+  circlePostCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    gap: 6,
+    marginVertical: 4,
+  },
+  parentMiniAvatar: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#FDE68A',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  parentPostAuthor: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  parentPostTime: {
+    fontSize: 9.5,
+    color: '#94A3B8',
+  },
+  parentPostContent: {
+    fontSize: 11.5,
+    color: '#334155',
+    lineHeight: 17,
+  },
+  postReactionRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 4,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    paddingTop: 6,
+  },
+  reactionText: {
+    fontSize: 10.5,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  circleActionBtn: {
+    backgroundColor: '#0284C7',
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 4,
+    ...Shadows.glowPrimary,
+  },
+  circleActionBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 12.5,
   },
 });

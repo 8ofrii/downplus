@@ -26,6 +26,53 @@ export default function HomeScreen() {
 
   const [activeStep, setActiveStep] = useState(2); // Step 3 in progress
 
+  // Daily 20-Min Home Therapy Routine & Streaks Engine
+  const [streakCount, setStreakCount] = useState(14);
+  const [routineCompleted, setRoutineCompleted] = useState(false);
+  const [routineCelebration, setRoutineCelebration] = useState(false);
+  const [homeDrills, setHomeDrills] = useState([
+    {
+      id: 1,
+      title: 'تقوية عضلات الفم والبلع والتخاطب',
+      duration: '5 دقائق',
+      icon: '👅',
+      desc: 'تمارين تحريك الشفاه ونطق صوت "مــاء" لتهيئة مخارج الحروف.',
+      done: true,
+    },
+    {
+      id: 2,
+      title: 'التوازن ونقل الوزن التبادلي',
+      duration: '10 دقائق',
+      icon: '🚶‍♂️',
+      desc: 'المشي على شريط ملون بالأرض لنقل مركز الثقل وتثبيت عضلات الحوض.',
+      done: false,
+    },
+    {
+      id: 3,
+      title: 'مراجعة إشارتي ماكاتون (ماء وطعام)',
+      duration: '5 دقائق',
+      icon: '🤟',
+      desc: 'استخدام إشارة اليد للتعبير عن الرغبة في الشرب قبل تقديم الكوب.',
+      done: false,
+    },
+  ]);
+
+  const toggleDrill = (id: number) => {
+    setHomeDrills((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, done: !d.done } : d))
+    );
+  };
+
+  const handleCompleteRoutine = () => {
+    setHomeDrills((prev) => prev.map((d) => ({ ...d, done: true })));
+    setRoutineCompleted(true);
+    setStreakCount((prev) => prev + 1);
+    setRoutineCelebration(true);
+    setTimeout(() => {
+      setRoutineCelebration(false);
+    }, 3500);
+  };
+
   const handleQuickLog = async () => {
     if (!noteContent.trim()) return;
     try {
@@ -145,6 +192,88 @@ export default function HomeScreen() {
               onPress={() => setAapModalVisible(true)}
             >
               <Text style={styles.aapDetailsBtnText}>جدول الفحوصات 📋</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* ── 2.5. Daily 20-Min Home Therapy Routine & Streaks Engine ── */}
+        <View style={styles.routineCard}>
+          <View style={styles.routineHeader}>
+            <View style={styles.routineHeaderLeft}>
+              <View style={styles.flameIconWrap}>
+                <Text style={{ fontSize: 20 }}>🔥</Text>
+              </View>
+              <View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={styles.routineTitle}>برنامج التأهيل المنزلي اليومي</Text>
+                  <View style={styles.streakBadge}>
+                    <Text style={styles.streakBadgeText}>{streakCount} يوم متواصل! 🔥</Text>
+                  </View>
+                </View>
+                <Text style={styles.routineSub}>
+                  خطة علاج طبيعي وتخاطب منزلية (20 دقيقة) معدة بناءً على عمر
+                </Text>
+              </View>
+            </View>
+            <View style={styles.pointsPill}>
+              <Text style={styles.pointsPillText}>+50 نقطة ⭐</Text>
+            </View>
+          </View>
+
+          {/* Celebration Banner Toast */}
+          {routineCelebration && (
+            <View style={styles.celebrationBanner}>
+              <Text style={styles.celebrationEmoji}>🎉 🌟 👏</Text>
+              <Text style={styles.celebrationText}>
+                بطل يا عمر! تم تسجيل إنجاز اليوم بنجاح ورفع الستريك إلى {streakCount} يوماً متواصلاً!
+              </Text>
+            </View>
+          )}
+
+          {/* Drills Checklist */}
+          <View style={styles.drillsList}>
+            {homeDrills.map((drill) => (
+              <TouchableOpacity
+                key={drill.id}
+                style={[styles.drillItem, drill.done && styles.drillItemDone]}
+                onPress={() => toggleDrill(drill.id)}
+                activeOpacity={0.8}
+              >
+                <View style={[styles.drillCheckbox, drill.done && styles.drillCheckboxDone]}>
+                  <Text style={styles.drillCheckText}>{drill.done ? '✓' : ''}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={[styles.drillItemTitle, drill.done && styles.drillItemTitleDone]}>
+                      {drill.icon} {drill.title}
+                    </Text>
+                    <Text style={styles.drillDuration}>{drill.duration}</Text>
+                  </View>
+                  <Text style={styles.drillDesc}>{drill.desc}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Action Row */}
+          <View style={styles.routineActionRow}>
+            <TouchableOpacity
+              style={[styles.completeRoutineBtn, routineCompleted && styles.completeRoutineBtnDone]}
+              onPress={handleCompleteRoutine}
+              activeOpacity={0.85}
+              disabled={routineCompleted}
+            >
+              <Text style={styles.completeRoutineBtnText}>
+                {routineCompleted ? '✓ تم إكمال روتين اليوم بنجاح' : 'تسجيل إتمام تمرين اليوم (+50 نقطة ⭐)'}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.makatonShortcutBtn}
+              onPress={() => router.push('/(tabs)/milestones')}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.makatonShortcutText}>قاموس ماكاتون 🤟</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -1325,5 +1454,180 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '800',
     fontSize: 14,
+  },
+
+  // Daily 20-Min Home Routine & Streak Card
+  routineCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: '#FDE68A',
+    ...Shadows.glass,
+    gap: 12,
+  },
+  routineHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  routineHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  flameIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  routineTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  streakBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#FCD34D',
+  },
+  streakBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#B45309',
+  },
+  routineSub: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  pointsPill: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  pointsPillText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#B45309',
+  },
+  celebrationBanner: {
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1.5,
+    borderColor: '#6EE7B7',
+    borderRadius: 14,
+    padding: 10,
+    alignItems: 'center',
+    gap: 4,
+  },
+  celebrationEmoji: {
+    fontSize: 20,
+  },
+  celebrationText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#065F46',
+    textAlign: 'center',
+  },
+  drillsList: {
+    gap: 8,
+  },
+  drillItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  drillItemDone: {
+    backgroundColor: '#F0FDF4',
+    borderColor: '#BBF7D0',
+  },
+  drillCheckbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#CBD5E1',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  drillCheckboxDone: {
+    backgroundColor: '#10B981',
+    borderColor: '#10B981',
+  },
+  drillCheckText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 12,
+  },
+  drillItemTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  drillItemTitleDone: {
+    color: '#047857',
+  },
+  drillDuration: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#94A3B8',
+  },
+  drillDesc: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+    lineHeight: 16,
+  },
+  routineActionRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 4,
+  },
+  completeRoutineBtn: {
+    flex: 2,
+    backgroundColor: '#D97706',
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadows.glass,
+  },
+  completeRoutineBtnDone: {
+    backgroundColor: '#059669',
+  },
+  completeRoutineBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12.5,
+    fontWeight: '800',
+  },
+  makatonShortcutBtn: {
+    flex: 1,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  makatonShortcutText: {
+    color: '#334155',
+    fontSize: 12,
+    fontWeight: '800',
   },
 });
